@@ -1,0 +1,13 @@
+{
+  "name": "star-kylin-ui-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "description": "High-fidelity UI prototype for the Star Kylin banking desktop MVP.",
+  "scripts": {
+    "preview": "node server.mjs"
+  },
+  "dependencies": {
+    "echarts": "6.1.0",
+    "lucide": "1.25.0"
+  }
+}
