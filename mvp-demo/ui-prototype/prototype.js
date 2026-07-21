@@ -684,6 +684,22 @@
       tooltip: {
         trigger: "axis",
         axisPointer: { type: "cross" },
+        formatter: (items) => {
+          const candle = items.find((item) => item.seriesType === "candlestick");
+          const volume = items.find((item) => item.seriesType === "bar");
+          if (!candle) return "";
+          const [, open, close, low, high] = candle.data;
+          const price = new Intl.NumberFormat("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          const quantity = new Intl.NumberFormat("zh-CN");
+          return [
+            `<strong>${candle.axisValue}</strong>`,
+            `开盘 ${price.format(open)}`,
+            `最高 ${price.format(high)}`,
+            `最低 ${price.format(low)}`,
+            `收盘 ${price.format(close)}`,
+            `成交量 ${quantity.format(volume?.value ?? 0)}`,
+          ].join("<br>");
+        },
         borderColor: "#b9c9da",
         borderWidth: 1,
         backgroundColor: "rgba(255,255,255,0.96)",
@@ -1083,6 +1099,7 @@
       const menu = document.querySelector(".user-popover:not([hidden])");
       if (dialog) {
         setRoute({ modal: null });
+        document.querySelector('[data-open="native"]')?.focus();
       } else if (menu) {
         menu.hidden = true;
         const trigger = document.querySelector(".user-trigger");

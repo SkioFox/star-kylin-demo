@@ -791,19 +791,19 @@ button:disabled {
   margin: 0 4px 10px;
 }
 
-.sidebar-user-summary strong,
-.sidebar-user-summary span {
+.sidebar-user-summary > div > strong,
+.sidebar-user-summary > div > span {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.sidebar-user-summary strong {
+.sidebar-user-summary > div > strong {
   font-size: 12px;
 }
 
-.sidebar-user-summary span {
+.sidebar-user-summary > div > span {
   margin-top: 2px;
   color: rgb(255 255 255 / 50%);
   font-size: 11px;

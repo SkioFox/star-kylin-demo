@@ -2,6 +2,8 @@
 
 本目录是 [UI 原型与功能规格](../UI原型与功能规格.md) 的可运行视觉实现，仅用于界面与交互评审，不连接真实认证、业务系统、本机应用或行情服务。
 
+浏览器技术验收结论与边界见 [UI 验收记录](./UI验收记录.md)。
+
 ## 运行
 
 本机 Node/npm 默认通过 Volta 使用：
@@ -34,7 +36,7 @@ Mock 账号：
 | Web 加载 | `?screen=web&user=demoA&state=loading` |
 | Web 错误 | `?screen=web&user=demoA&state=error` |
 | Web 越界拦截 | `?screen=web&user=demoA&state=blocked` |
-| K 线 | `?screen=kline&user=demoA&period=day` |
+| K 线（保留 Web 与行情任务） | `?screen=kline&user=demoA&period=day&tabs=web,kline` |
 | K 线加载 | `?screen=kline&user=demoA&state=loading` |
 | K 线空数据 | `?screen=kline&user=demoA&state=empty` |
 | K 线错误 | `?screen=kline&user=demoA&state=error` |
@@ -81,10 +83,10 @@ Mock 账号：
 
 ## 已验证
 
-- `1440×900` 与 `1366×768` 下 18 个状态均无页面级溢出。
-- `1366×768 @ 125% / 150%` 等效逻辑视口下关键页面无裁切和页面级滚动。
+- 18 个状态在 `1440×900`、`1366×768`、125% 与 150% 等效逻辑视口下共完成 72 次布局检查，均无页面级溢出、关键文本裁切和空白图表。
+- 所有可见按钮与输入控件不小于 `44×44px`；5 个代表页面的 118 个可见文本节点均达到 WCAG AA 对比度。
 - 登录成功/失败、两个角色菜单差异、退出登录可操作。
 - 未授权角色直接访问模块 URL 时返回其工作台。
-- Web 错误可重新加载，原生应用错误弹窗支持键盘关闭和焦点约束。
-- 日 K、周 K、月 K 使用对应粒度的 Mock 聚合数据；滚轮缩放与拖拽平移会更新可视数据区间。
+- Web 错误可重新加载；原生应用错误弹窗支持焦点约束、键盘关闭和关闭后回焦。
+- 日 K、周 K、月 K 使用对应粒度的 Mock 聚合数据；滚轮缩放与拖拽平移会更新可视数据区间；十字线浮层使用中文 OHLC 与成交量字段。
 - 浏览器控制台为 `0 errors / 0 warnings`。
