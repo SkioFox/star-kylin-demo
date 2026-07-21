@@ -187,6 +187,8 @@
 - `docs/design/应用清单与治理.md` —— 签名清单/更新回滚/CVE/SBOM
 - `docs/design/原生应用集成-IPC.md` —— 二期,预留
 - `docs/M-1-可行性验证.md`
+- `docs/开发与构建环境.md` —— Intel Mac 外网开发 / 内网验证 / 摆渡与离线依赖
+- `docs/行内对接确认清单.md` —— 全部待确认项按 P0–P3 分级(对接用)
 
 ---
 
