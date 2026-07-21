@@ -1,9 +1,10 @@
 # 星麒业务工作台 MVP Demo 技术方案
 
-> 版本：v0.1
+> 版本：v0.3
 > 日期：2026-07-21
 > 状态：**方案已形成，T0A/T0B 环境与演示内容待回填**
 > 需求基线：[MVP-demo需求.md](./MVP-demo需求.md)
+> 任务基线：[MVP任务拆解.md](./MVP任务拆解.md)
 > UI 基线：[UI原型与功能规格.md](./UI原型与功能规格.md)
 > UI 技术验收：[ui-prototype/UI验收记录.md](./ui-prototype/UI验收记录.md)
 
@@ -20,6 +21,8 @@
 
 本方案不实现真实 CAS、权限中心、业务鉴权、国密、审计平台、通用 JSBridge、原生 IPC、插件市场、在线更新或生产级应用治理。Demo 中形成的接口不得被描述为上述生产能力已经落地。
 
+用户已补充明确：最终必须得到可在麒麟安装并运行的安装包。因此本方案将目标架构 `.deb` 纳入强制交付，覆盖 `MVP-demo需求.md` 早期“不做打包结论”的边界；生产级签名、灰度和在线升级仍不进入 MVP。
+
 ## 2. 技术决策
 
 | 领域 | MVP 选型 | 决策理由 |
@@ -33,7 +36,7 @@
 | 图标 | 从当前 Lucide `1.25.0` 中提取所需 SVG 并编入 `qrc` | 与原型一致；正式程序不依赖 Node/npm 运行时 |
 | 状态保存 | 仅进程内内存 | MVP 无恢复上次会话需求，退出后回到登录页 |
 | 日志 | Qt `QLoggingCategory` | 标准能力足够；不引入第三方日志库 |
-| 交付运行 | 验收机上的构建产物与运行说明 | MVP 先闭环指定真机；不把 `.deb` 打包作为本轮结论 |
+| 安装交付 | 目标架构 `.deb` + 校验值 + 安装运行说明 | 最终必须在指定麒麟真机完成安装、启动和卸载闭环 |
 
 ### 2.1 Qt 版本策略
 
@@ -41,7 +44,7 @@
 
 - 优先使用与目标麒麟镜像兼容且可获得安全维护的 Qt 套件。
 - 同一交付物不得混用 Qt 主版本或来自不同发行源的 QtWebEngine 组件。
-- 必须具备 `Core`、`Gui`、`Qml`、`Quick`、`QuickControls2`、`WebEngineQuick` 和 `Test` 模块。
+- 必须具备 `Core`、`Gui`、`Qml`、`Quick`、`QuickControls2`、目标 Qt 主版本对应的 WebEngine QML 模块和 `Test` 模块。
 - T0A 若发现 ECharts `6.1.0` 与目标 QtWebEngine/Chromium 不兼容，才允许调整图表版本；调整后必须重新执行 K 线视觉与交互验收并更新第三方清单。
 - Qt 授权方式、动态链接要求及 QtWebEngine/Chromium 安全维护责任在交付前确认；MVP 也必须附第三方许可证说明。
 
@@ -70,8 +73,7 @@
 ```text
 star-kylin-demo 主进程
   ├─ QML UI 与 C++ 控制器
-  ├─ QtWebEngineProcess：指定 Web 页面
-  ├─ QtWebEngineProcess：本地 K 线页面
+  ├─ 一个或多个 QtWebEngineProcess：指定 Web 页面与本地 K 线页面
   └─ QProcess：拉起白名单麒麟应用（独立系统窗口）
 ```
 
@@ -86,7 +88,7 @@ QtWebEngine 本身是多进程架构。门户不尝试把原生应用窗口嵌�
 | `MockAuthService` | 校验两个假账号并返回用户/角色 | 网络认证、令牌、真实密码存储 |
 | `ModuleListModel` | 向 QML 暴露当前角色可见模块 | 决定权限主数据 |
 | `TabListModel` | 固定工作台、Web/K 线标签单实例、切换与关闭 | 原生应用窗口管理 |
-| `UrlPolicy` | 对顶层导航、重定向、资源来源和新窗口做精确判断 | 代替目标 Web 后端鉴权 |
+| `UrlPolicy` + 请求拦截器 | 对顶层导航、重定向、资源来源和新窗口做精确判断 | 代替目标 Web 后端鉴权 |
 | `NativeLauncher` | 校验固定路径并通过 QProcess 直接启动 | Shell、路径搜索、IPC、进程托管 |
 | `WebModulePage` | Web 工具条、加载/错误/越界状态、刷新 | 任意地址输入、下载管理器 |
 | `KlineModulePage` | 加载离线图表页，呈现加载/空/错误状态 | 真实行情、通用 Bridge |
@@ -99,6 +101,7 @@ QtWebEngine 本身是多进程架构。门户不尝试把原生应用窗口嵌�
 mvp-demo/
   MVP-demo需求.md
   MVP技术方案.md
+  MVP任务拆解.md
   UI原型与功能规格.md
   ui-prototype/                 # 已验收浏览器原型，不作为正式运行时
   app/
@@ -139,6 +142,9 @@ mvp-demo/
       test_auth.cpp
       test_tabs.cpp
       test_urlpolicy.cpp
+    packaging/
+      star-kylin-demo.desktop
+      star-kylin-demo.svg
     THIRD_PARTY_NOTICES.md
     README.md
 ```
@@ -202,6 +208,8 @@ Manifest 校验必须在显示工作台前完成。解析失败不能回退到�
 
 `qrc` 页面不按网络 Origin 比较，只允许命中当前模块的精确资源前缀。替换为内网 Web 页面时，清空 `allowedLocalPrefixes`，`entryUrl` 必须使用 HTTPS，并分别列出允许的顶层导航 Origin 和页面确实依赖的资源 Origin。配置仍编译进 `qrc`，不从用户可写目录覆盖。
 
+默认 `web-demo` 是只包含本地 HTML/CSS/JavaScript 的轻量验收夹具，不承载业务功能或业务数据。正常页用于验证加载与刷新；A06 使用无效入口触发加载失败，A07 由夹具中的固定测试链接或 `window.open` 请求触发越界拦截。
+
 ### 5.3 校验规则
 
 - `schemaVersion` 必须等于程序支持的版本。
@@ -209,7 +217,7 @@ Manifest 校验必须在显示工作台前完成。解析失败不能回退到�
 - 角色引用的模块必须存在；模块类型只允许 `web`、`native`、`kline`。
 - Web URL 必须是受支持的 `qrc` 页面或 HTTPS URL；禁止 HTTP 降级、用户信息段和通配 Origin。
 - `qrc` 入口必须位于模块自己的 `allowedLocalPrefixes` 下；HTTPS 入口的精确 Origin 必须包含在顶层导航白名单中。
-- Native `program` 必须是绝对路径，`args` 只能来自只读清单且数量、长度受限。
+- Native `program` 必须是绝对路径；`args` 只能来自只读清单，最多 5 项，每项最长 256 个字符且不得包含 NUL，并作为 `QStringList` 直接传给 QProcess，不进行 Shell 解析。
 - K 线入口必须指向应用自身 `qrc` 资源，不允许远程 URL。
 - 任一未知字段若影响安全语义，应按配置错误处理，不静默忽略。
 
@@ -243,14 +251,14 @@ login(username, password)
 - 退出登录或进程退出才销毁全部业务标签。
 - 原生应用不进入标签模型。
 
-QML 必须实现原型已验收的 roving tab 焦点：活动标签 `TabFocus`，方向键/Home/End 切换，关闭后焦点回到相邻标签。
+QML 必须实现原型已验收的 roving tab 焦点：活动标签使用 `Qt.TabFocus`，方向键/Home/End 切换，关闭后焦点回到相邻标签。
 
 ### 6.3 指定 Web 页面
 
 #### Profile 策略
 
 - 业务 Web 标签共享一个仅当前进程有效的 Profile，便于同一演示会话内复用 cookie。
-- 使用内存 cookie/cache；不在用户目录持久化会话。
+- Profile 设置为 `offTheRecord`，cookie、HTTP cache 和其他会话数据只在内存中保存。
 - K 线使用独立离线 Profile，禁止 HTTP/HTTPS 网络请求。
 - 退出登录时清理业务 Profile；不与系统浏览器共享 Profile。
 
@@ -268,11 +276,13 @@ QML 必须实现原型已验收的 roving tab 焦点：活动标签 `TabFocus`�
 ```
 
 - 禁止字符串前缀判断，避免 `allowed.example.evil`、端口变化和 HTTP 降级绕过。
+- 比较前使用 QUrl 规范化 scheme、主机、有效端口和路径；`qrc` 路径拒绝 `..` 等逃逸形式后再匹配资源前缀。
+- `navigationRequested` 校验顶层导航，`newWindowRequested` 处理新窗口，`QWebEngineUrlRequestInterceptor` 校验资源请求，Profile 的 `downloadRequested` 一律取消下载。
 - 默认拒绝新窗口；若目标业务确需新窗口，MVP 仍在当前受控标签内处理且重新校验，不交给系统浏览器。
 - 拦截并取消下载请求；MVP 不提供文件下载能力。
 - 证书错误直接失败，不提供“继续访问”。
 - 发布构建不开启远程调试和 DevTools。
-- `loadStarted` 进入加载态，`loadFinished(true)` 进入可用态，`loadFinished(false)` 或渲染进程异常进入可恢复错误态。
+- 通过 QML `loadingChanged` 将开始、成功和失败映射到模块状态；`renderProcessTerminated` 进入可恢复错误态。具体枚举名以 T0A 锁定的 Qt 主版本为准。
 - 错误页面由 QML 外壳呈现，不加载网络返回的自定义错误脚本。
 
 资源来源控制与顶层导航分开。真实目标页若依赖 CDN、字体、接口或 WebSocket，必须在 T0B 列清依赖并逐项加入 `allowedResourceOrigins`；不能直接放开 `*`。
@@ -292,7 +302,7 @@ launch(moduleId)
 
 - 启动期间禁用入口，防止重复拉起。
 - 路径缺失或不可执行时显示“未找到指定应用”。
-- Qt 返回启动失败时显示“应用启动失败”，允许重试。
+- 使用 `QProcess::startDetached(program, args, workingDirectory, &pid)` 直接启动；返回失败时显示“应用启动失败”，允许重试。
 - 启动成功定义为 Qt 已成功创建进程并取得有效 PID；不声称目标窗口已经完成业务初始化。
 - 不调用 `sh -c`、`bash -c`、`system()`，不在 PATH 中搜索替代程序，不尝试第二个候选路径。
 - MVP 不跟踪退出状态、不终止外部应用、不传递登录票据。
@@ -394,7 +404,7 @@ QML 不直接读取 Manifest、不自行拼 URL、不直接创建 QProcess。所
 - Native 路径/参数不能由用户输入、Web 页面或用户目录配置修改。
 - K 线页面在断网环境下没有任何网络请求。
 
-## 9. 构建与交付
+## 9. 构建、打包与交付
 
 ### 9.1 T0A 环境基线
 
@@ -408,6 +418,7 @@ echo "$XDG_SESSION_TYPE"
 cmake --version
 gcc --version
 qmake -v
+qtpaths --qt-version
 dpkg-query -W 'qt*' | sort
 ```
 
@@ -415,11 +426,15 @@ dpkg-query -W 'qt*' | sort
 
 ### 9.2 架构策略
 
-- MVP 的权威交付架构由验收机 `uname -m` 决定，不根据行业经验猜测。
+- MVP 的权威交付架构由验收机 `uname -m` 决定，不根据行业经验猜测；安装包必须与该架构一致。
 - 若只能先提供一台机器，优先使用现有决策中的 ARM64 飞腾/鲲鹏机器；x86_64 可用于开发期冒烟。
 - C++/QML 代码不得包含架构分支；第三方资源必须是纯 JS/SVG/数据或有对应架构包。
-- 若 T0A 额外安排 `.deb` 探路，架构名使用 Debian 规范：ARM64 为 `arm64`，x86_64 为 `amd64`；结果只记为实验，不纳入 MVP DoD。
-- 后续要求双架构交付时，应在两个原生或受支持的构建环境分别构建；不把 Intel Mac 上的 ARM 模拟结果作为真机结论。
+- ARM64 与 x86_64 需要两个独立安装包，不制作所谓“通用二进制”：
+  - `star-kylin-demo_<version>_arm64.deb`
+  - `star-kylin-demo_<version>_amd64.deb`
+- MVP DoD 至少包含 T0A 锁定验收机架构的 `.deb`；若验收范围包含两类机器，则两个包都必须在各自真机通过验收。
+- 每个包应在对应架构的原生或受支持构建环境产生；不把 Intel Mac 上的 ARM 模拟结果作为真机结论。
+- 当前 Intel Mac 只用于编码和原型验证，不能产出可宣称通过麒麟验收的最终 `.deb`；最终包必须进入 Linux/麒麟构建与真机验证通道。
 
 ### 9.3 CMake 约束
 
@@ -429,15 +444,63 @@ dpkg-query -W 'qt*' | sort
 - 测试使用 Qt Test 并通过 CTest 执行。
 - Release 构建关闭远程调试和测试入口，保留必要符号包由交付流程决定。
 
-### 9.4 离线依赖与许可证
+### 9.4 `.deb` 安装布局
+
+MVP 使用 CMake install 规则生成 staging 目录，再由 CPack DEB 生成安装包，不额外引入打包框架：
+
+```text
+/opt/star-kylin-demo/bin/star-kylin-demo
+/opt/star-kylin-demo/lib/                 # 仅应用自带运行库方案使用
+/opt/star-kylin-demo/plugins/             # 仅应用自带 Qt 插件方案使用
+/opt/star-kylin-demo/qml/                 # 仅应用自带 QML 模块方案使用
+/opt/star-kylin-demo/resources/           # QtWebEngine 运行资源（如需自带）
+/usr/share/applications/star-kylin-demo.desktop
+/usr/share/icons/hicolor/scalable/apps/star-kylin-demo.svg
+/usr/share/doc/star-kylin-demo/THIRD_PARTY_NOTICES.md
+```
+
+- Desktop Entry 的 `Exec` 直接指向二进制，不使用 Shell 拼接命令。
+- 安装包不写用户主目录，不修改系统证书、浏览器配置或安全策略。
+- 除刷新桌面图标缓存等标准动作外，不使用带业务逻辑的 `postinst` 脚本。
+- CPack 开启 Debian shared-library dependency 扫描；QML 模块和 QtWebEngine 运行资源不只依赖 `ldd`，必须按 T0A 实际 Qt 套件显式检查。
+- 生成安装包后同时生成 SHA-256 校验值；是否增加行内签名由验收环境流程决定，不在代码中伪造签名能力。
+
+### 9.5 Qt 运行时装载策略
+
+T0A 在以下两种方式中选一项并写入构建说明，不允许安装时临时下载依赖：
+
+| 方式 | 使用条件 | 包内容 |
+|---|---|---|
+| 依赖系统 Qt（MVP 首选） | 验收镜像 Qt/QtWebEngine 版本固定且内网源可安装 | `.deb` 声明精确运行依赖，应用不重复打包 Qt |
+| 应用自带 Qt | 目标镜像 Qt 不满足要求，且授权/体积/安全维护已确认 | 随包放置 Qt 库、QML 模块、平台插件、QtWebEngineProcess、`.pak`、locales 等完整资源 |
+
+应用自带 Qt 时必须配置受控的运行库/QML/插件搜索路径，并用干净验收机验证，不能依赖开发机环境变量。QtWebEngineProcess、资源包或 locales 缺失均视为安装包失败。
+
+### 9.6 离线依赖与许可证
 
 内网无公网场景下，以下内容必须随源码或受控制品一并准备：
 
 - 目标架构 Qt/QtWebEngine 开发包及运行依赖的来源说明。
 - ECharts `6.1.0`、所选 Lucide SVG 及对应许可证文本。
 - `THIRD_PARTY_NOTICES.md` 和依赖版本/校验值清单。
-- CMake/GCC 工具链版本说明和离线构建脚本。
+- CMake/GCC 工具链版本说明、CMake install/CPack 配置和离线构建脚本。
 - 不在内网构建阶段执行 `npm install`、访问 CDN 或下载字体。
+
+进入 T1 目标架构构建前，最小构建与运行依赖、ECharts/Lucide 资源及许可证必须已通过批准的摆渡通道，或已在目标网络的批准源中可获取；归档版本、校验值和可获取证据。仅确认公网来源不视为 T0A/T0B 完成。
+
+### 9.7 安装包验收
+
+在一台未配置开发环境的同版本麒麟验收机执行：
+
+```bash
+dpkg-deb --info star-kylin-demo_<version>_<arch>.deb
+dpkg-deb --contents star-kylin-demo_<version>_<arch>.deb
+sudo apt install ./star-kylin-demo_<version>_<arch>.deb
+/opt/star-kylin-demo/bin/star-kylin-demo
+sudo apt remove star-kylin-demo
+```
+
+通过标准：依赖可从批准的内网源或离线包满足；命令行和桌面入口均可启动；QtWebEngine 子进程、中文字体、图标和本地 K 线资源完整；卸载后不残留 `/opt/star-kylin-demo` 文件。
 
 ## 10. 测试方案
 
@@ -448,13 +511,13 @@ dpkg-query -W 'qt*' | sort
 | C++ 单元 | Manifest 校验、Mock 登录、角色过滤、标签单实例、URL Origin 判断 | Qt Test + CTest |
 | QML 组件 | 模型绑定、焦点路径、状态切换的最小冒烟 | Qt Quick Test（目标环境可用时） |
 | K 线页面 | 日/周/月数据量、非空画布、缩放/平移、中文浮层、断网 | Playwright，仅作为开发/验收工具 |
-| 构建 | Debug/Release 编译、资源存在、无未解析运行库 | CMake/CTest/`ldd` |
+| 构建/安装 | Debug/Release 编译、资源存在、依赖闭合、`.deb` 内容正确 | CMake/CTest/CPack/`ldd`/`dpkg-deb` |
 
-安全关键逻辑至少覆盖：合法/非法 Origin、端口差异、重定向、重复模块 ID、未知角色、未授权模块和不可执行程序。
+安全关键逻辑至少覆盖：合法/非法 Origin、端口差异、重定向、重复模块 ID、未知角色、未授权模块、不可执行程序，以及参数超限或包含 NUL 的 Manifest。
 
 ### 10.2 麒麟真机验收
 
-按 `MVP-demo需求.md` 的 A01–A12 执行，并补充：
+按 `MVP-demo需求.md` 的 A01–A13 执行，并补充：
 
 - `1440×900`、`1366×768` 和目标机实际 `100% / 125% / 150%` 缩放截图。
 - X11/Wayland、中文字体、输入法、键盘焦点和外部应用窗口行为。
@@ -465,27 +528,29 @@ dpkg-query -W 'qt*' | sort
 ### 10.3 完成判定
 
 - CTest 全部通过。
-- A01–A12 全部通过且有截图/日志记录。
+- A01–A13 全部通过且有截图/日志记录。
 - 控制台和应用日志无未处理异常、敏感输入或真实业务数据。
-- 指定验收机从源码构建、启动和完整演示闭环完成。
+- 目标架构 `.deb` 在干净麒麟验收机完成安装、桌面/命令行启动、完整演示和卸载闭环。
 - 实现与 UI 原型的可见差异均记录并经业务确认。
 
 ## 11. 实施顺序
 
+详细工作包、边界、依赖和完成证据见 [MVP任务拆解.md](./MVP任务拆解.md)；本节只保留技术阶段摘要。
+
 | 阶段 | 实施内容 | 退出条件 |
 |---|---|---|
-| T0A | 锁定麒麟、CPU、Qt/QtWebEngine、合成器、字体和构建通道 | 环境基线表完整；空 WebEngine 窗口可运行 |
+| T0A | 锁定麒麟、CPU、Qt/QtWebEngine、合成器、字体、构建与打包通道 | 环境基线表完整；空 WebEngine 窗口可运行；测试 `.deb` 路线可执行 |
 | T0B | 确认 Web URL、Origin、原生程序、ECharts 兼容性和 Mock 数据 | Manifest 内容可冻结；许可证可交付 |
-| T1 | 创建 `app` CMake 骨架、资源和日志 | Debug/Release 可编译，麒麟可启动空窗口 |
+| T1 | 创建 `app` CMake、CMake install/CPack 骨架、资源和日志 | Debug/Release 可编译，麒麟可启动空窗口，对应架构 Linux/麒麟构建通道可生成测试 `.deb` |
 | T2 | 按 UI 基线实现登录、外壳、工作台、标签和状态组件 | 主要布局与键盘路径通过 |
 | T3 | 实现 Manifest 校验、模型和模块分发 | 无效配置拒绝启动；角色映射正确 |
 | T4 | 实现 Mock 登录/退出和权限过滤 | A01–A04 通过 |
 | T5 | 实现受控 WebView 和错误恢复 | A05–A07 通过 |
 | T6 | 实现固定 QProcess 拉起 | A08–A09 通过 |
 | T7 | 提取并嵌入离线 K 线页面 | A10–A11 通过 |
-| T8 | 真机回归、基线记录和演示材料 | A01–A12、构建产物和交付文档齐全 |
+| T8 | `.deb` 打包、干净机回归、基线记录和演示材料 | A01–A13、目标架构安装包和交付文档齐全 |
 
-T2 完成后可并行推进 T4–T7，但 T5/T6/T7 分别受 T0B 对应内容约束。任何 QtWebEngine 或 ARM64 阻塞必须在 T0A 暴露，不能留到 T8。
+T1.1–T1.4 的开发骨架可用后，T2 与 T3 可以并行开发，但三者只有在 T0A 门禁关闭后才能标记完成。T2 与 T3 完成后，T4–T7 在逻辑依赖上可并行推进，且 T5/T6/T7 分别受 T0B 对应内容约束；按单开发者排期时，这四项仍按串行或交错执行计算。任何 QtWebEngine 或 ARM64 阻塞必须在 T0A 暴露，不能留到 T8。
 
 ## 12. 风险与处理
 
@@ -504,38 +569,41 @@ T2 完成后可并行推进 T4–T7，但 T5/T6/T7 分别受 T0B 对应内容约
 
 | 决策 | 当前默认 | 必须确认时间 |
 |---|---|---|
-| 麒麟 V10 子版本、CPU/型号、X11/Wayland | 未知；ARM64 优先但以验收机为准 | T1 前 |
-| Qt/QtWebEngine/Chromium 与授权方式 | 使用验收镜像兼容版本 | T1 前 |
+| 麒麟 V10 子版本、CPU/型号、X11/Wayland | 未知；ARM64 优先但以验收机为准 | T1 完成前 |
+| Qt/QtWebEngine/Chromium、装载与授权方式 | 优先使用验收镜像兼容版本；系统 Qt 与应用自带 Qt 二选一 | T1 完成前 |
+| 安装包架构与构建通道 | 验收机架构包；对应架构 Linux/麒麟构建机；最小离线依赖已在目标网络就绪 | T1 完成前 |
 | Web 演示页与 Origin | 先用 `qrc` 离线页 | T5 前 |
 | 原生应用绝对路径与参数 | 验收机中选一个固定程序 | T6 前 |
 | ECharts 兼容性与许可证归档 | `6.1.0` / Apache-2.0 | T7 前 |
 | K 线 Mock 数据 | 复用原型固定数据，禁止真实行情 | T7 前 |
 | 银行名称、Logo 和最终文案 | `XX银行` 占位 | 最终 UI 验收前 |
 
-如果这些输入尚未拿到，可以完成方案评审和 T1/T2 外壳开发；不得用猜测值完成对应功能的最终验收。
+如果这些输入尚未拿到，可以完成方案评审和 T1–T3 本地骨架开发；不得用猜测值完成对应任务或最终验收。
 
 ## 14. 需求追踪
 
 | MVP 模块/用例 | 技术落点 |
 |---|---|
-| M1 / A12 门户外壳与真机 | QML 表现层、AppController、CMake、T0A/T8 |
+| M1 / A12 门户外壳与真机 | QML 表现层、AppController、T0A/T2/T8 |
 | M2 / A01–A04 Mock 登录权限 | ManifestService、MockAuthService、ModuleListModel |
 | M3 / A05–A07 内嵌 Web | WebModulePage、业务 Profile、UrlPolicy |
 | M4 / A08–A09 原生拉起 | NativeLauncher、只读 program/args、QProcess |
 | M5 / A10–A11 K 线 | 独立离线 Profile、ECharts、本地 Mock 数据、CSP |
+| M6 / A13 安装包 | CMake install、CPack DEB、目标架构干净机验收 |
 | S1 | NativeLauncher 不经 Shell，不接收用户路径/参数 |
 | S2 | 精确 Origin、重定向/弹窗/下载/证书错误拦截 |
 | S3 | 仅两个假账号；输入不落日志 |
 | S4 | K 线资源和数据全部本地化，网络请求为零 |
 | S5 | 不实现 QWebChannel 或通用 JSBridge |
+| S6 | CMake install/CPack、受控依赖声明、无动态下载维护脚本、干净机验收 |
 
 ## 15. MVP 技术完成定义
 
 - [ ] T0A/T0B 已回填，Qt、CPU、Web、Native 和图表依赖已锁定。
-- [ ] `mvp-demo/app` 可在指定麒麟真机编译、启动并完成演示。
+- [ ] `mvp-demo/app` 可在指定麒麟真机编译并生成目标架构 `.deb`。
 - [ ] Manifest 无效时拒绝进入工作台；普通用户不能覆盖白名单。
 - [ ] Mock 登录、角色菜单、标签、Web、Native、K 线均按 UI 基线实现。
 - [ ] Web 越界、下载、弹窗、证书错误和 Native 非白名单路径均被拒绝。
 - [ ] K 线断网可用且没有特权 Bridge。
-- [ ] CTest 与 A01–A12 全部通过。
-- [ ] 构建产物、构建运行说明、演示脚本、验收记录和第三方许可证齐全。
+- [ ] CTest 与 A01–A13 全部通过。
+- [ ] `.deb`、SHA-256、构建安装说明、演示脚本、验收记录和第三方许可证齐全。
