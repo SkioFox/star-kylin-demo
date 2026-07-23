@@ -85,3 +85,97 @@
 demo用什么语言写?这决定整个 demo 的工程形态: C++/QML、pthon3
 K 线图怎么实现? → 内嵌 web 图表库、原生
 现在就开始搭建吗? → 先不写,再确认需求
+
+## 架构问题
+
+  Intel x86_64 机器上可以通过以下方式交叉生成ARM64 .deb：
+
+  - 使用 aarch64-linux-gnu 交叉编译器。
+  - 准备完整的 ARM64 sysroot。
+  - 准备 ARM64 版本的 Qt、QtWebEngine、QML 插件和运行库。
+  - 给 CMake 配置 ARM64 toolchain file。
+
+  也可以使用 ARM64 Docker/QEMU 模拟构建，但 QtWebEngine编译和依赖安装会比较慢，稳定性也较差。
+
+  不能做的是直接用当前 x86_64 Qt 工具链编译，然后把CPack 的架构字段改成 arm64。这样只是“ARM64 文件名”，里面的 ELF 二进制仍然是 x86_64，麒麟 ARM 无法运行。、当前新增的 build-deb.sh 会主动阻止这种情况。
+
+  因此：
+
+  - Intel 机器可以作为 ARM64 交叉构建机。
+  - 但需要额外的 ARM64 工具链和 Qt 依赖。
+  - 最可靠方案仍是 ARM64 麒麟/Linux 原生构建机。
+  - 最终 ARM 包必须在 ARM64 麒麟真机安装、启动和验收，
+
+Intel 机器只能完成交叉编译验证，不能替代真机验收。ARM Mac 可以更可靠地生成 Linux ARM64 .deb，但仍有边界。
+
+Apple Silicon 本身运行 macOS，不能直接用 macOS 编译器生成麒麟 Linux 二进制。不过通过：
+
+  docker run --platform linux/arm64 ...
+
+容器内运行的是真实 ARM64 Linux 用户空间，不需要 QEMU模拟 CPU。因此可以稳定生成真正包含 AArch64 ELF 的arm64.deb，比 Intel Mac 模拟 ARM64 可靠很多。
+但它只证明“ARM64 Linux 包有效”，还不能自动证明“麒麟可运行”。最终可靠性取决于：
+
+  - 容器的 glibc 版本不能高于目标麒麟。
+  - Qt、QtWebEngine、QML 插件版本要与麒麟环境一致。
+  - Debian 依赖包名和版本需要匹配麒麟软件源。
+  - QtWebEngineProcess、Chromium 资源、sandbox、GPU 和中文字体必须真机验证。
+
+  推荐分级：
+
+  1. ARM Mac + ARM64 Ubuntu/Debian 容器：生成 ARM64开发验证包，可靠。
+  2. ARM Mac + 与目标麒麟一致的 ARM64 容器/sysroot：可作为正式构建通道候选。
+  3. ARM64 麒麟原生机器或官方构建环境：最终交付最可靠。
+  4. ARM64 麒麟真机安装和 A01–A13：最终支持声明的必要条件。
+
+  还应检查包内二进制，而不只看包名：
+
+  dpkg-deb -f package_arm64.deb Architecture file extracted/opt/star-kylin-demo/bin/star-kylin-demo
+  readelf -h extracted/opt/star-kylin-demo/bin/star-kylin-demo
+
+  预期分别看到 arm64、ARM aarch64 和 AArch64。ARM Mac能很好地解决 ARM64 构建问题，但 x86_64 最终包仍建议使用 x86_64 Linux/麒麟构建通道。
+
+在 ARM Mac 上应使用：
+
+  docker run --platform linux/arm64 ...
+
+容器内需要安装 ARM64 版本的 Linux Qt、QtWebEngine、QML和 C++ 工具链。进入容器后确认：
+  uname -m
+  dpkg --print-architecture
+
+  应分别得到类似：
+
+  aarch64
+  arm64
+
+  然后执行项目脚本：
+
+  STAR_KYLIN_EXPECTED_DEB_ARCH=arm64 ./tools/build-deb.sh
+
+  脚本会生成：
+
+  mvp-demo/app/dist/arm64/star-kylin-demo_0.1.0_arm64.deb
+
+  需要注意两点：
+
+  - 现有 star-kylin-qt-smoke:qt5-packaging镜像如果只有amd64 版本，ARM Mac 上可能只是通过模拟运行，不能直接作为ARM构建环境。需要构建或获取对应的 linux/arm64镜像。
+  - ARM Mac 生成的是有效的 Linux ARM64 包，但仍需在麒麟ARM64 真机验证 QtWebEngine、运行依赖、字体、GPU 和桌面入口，才能作为最终麒麟包。
+
+因此结论是：ARM Mac 可以承担 ARM64 .deb 的开发构建和验证，前提是使用真正的 ARM64 Linux/Qt 构建环境；x86_64 包继续由 Intel Mac 或 x86_64 Linux/麒麟环境生成。
+
+现在本地这个star-kylin-demo_0.1.0_amd64.deb是通过同样方式生成
+
+  mvp-demo/app/dist/amd64/star-kylin-demo_0.1.0_amd64.deb
+
+  通过相同思路生成的：
+
+  - Intel Mac，宿主架构 x86_64
+  - x86_64 Ubuntu 22.04 Docker 容器
+  - 容器内使用 Linux Qt 5.15、QtWebEngine、CMake、CTest 和 CPack
+  - 执行 mvp-demo/app/tools/build-deb.sh
+  - CTest 7/7 通过
+  - 包内 Architecture 检查为 amd64
+  - SHA-256：dceefea1cafdfed42e4de7a7bec0c65b995ed6dfa0d06d0ee4e589d9c77b9cd7
+
+  ARM Mac 可以复制这套流程，只需要换成真正的 ARM64 Ubuntu/麒麟 Qt 构建镜像，并执行：STAR_KYLIN_EXPECTED_DEB_ARCH=arm64 ./tools/build-deb.sh
+
+  这样两个包的构建流程就是对称的：Intel Mac 产出 amd64，ARM Mac 产出 arm64。

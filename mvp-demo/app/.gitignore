@@ -1,0 +1,7 @@
+/build*/
+/package*/
+/staging*/
+/output/
+/dist/
+/.cache/
+*.user

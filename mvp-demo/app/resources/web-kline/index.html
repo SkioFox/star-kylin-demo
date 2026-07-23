@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+    <title>行情中心</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="chart-shell">
+      <div id="chart" role="img" aria-label="示例指数 K 线与成交量图"></div>
+      <div id="chart-empty" class="chart-state" hidden>
+        <strong>暂无演示行情数据</strong>
+        <span>本地数据集没有可展示的记录。</span>
+      </div>
+    </main>
+    <section class="summary" aria-live="polite" aria-label="当前行情数据">
+      <dl>
+        <div><dt>日期</dt><dd id="date-value">-</dd></div>
+        <div><dt>开盘</dt><dd id="open-value">-</dd></div>
+        <div><dt>最高</dt><dd id="high-value">-</dd></div>
+        <div><dt>最低</dt><dd id="low-value">-</dd></div>
+        <div><dt>收盘</dt><dd id="close-value">-</dd></div>
+        <div><dt>成交量</dt><dd id="volume-value">-</dd></div>
+      </dl>
+    </section>
+    <script src="echarts.min.js"></script>
+    <script src="mock-market.js"></script>
+    <script src="kline.js"></script>
+  </body>
+</html>

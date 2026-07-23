@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=星麒业务工作台
+Comment=麒麟桌面业务工作台 MVP Demo
+Exec=/opt/star-kylin-demo/bin/star-kylin-demo
+Icon=star-kylin-demo
+Terminal=false
+Categories=Office;
+StartupNotify=true

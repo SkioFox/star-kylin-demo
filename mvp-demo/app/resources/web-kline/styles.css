@@ -1,0 +1,68 @@
+:root {
+  color: #14243a;
+  background: #ffffff;
+  font-family: "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+body { display: grid; grid-template-rows: minmax(160px, 1fr) 58px; }
+
+.chart-shell { position: relative; min-height: 0; background: #fcfdff; }
+#chart { width: 100%; height: 100%; }
+.chart-state {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  color: #596b82;
+  background: #ffffff;
+}
+.chart-state[hidden] { display: none; }
+.chart-state strong { color: #14243a; font-size: 16px; }
+.chart-state span { font-size: 13px; }
+
+.summary {
+  min-height: 58px;
+  border-top: 1px solid #d7e1ed;
+  background: #ffffff;
+}
+
+.summary dl {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  height: 100%;
+  margin: 0;
+}
+
+.summary div {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 0 14px;
+  border-right: 1px solid #e4eaf1;
+}
+.summary div:last-child { border-right: 0; }
+.summary dt { color: #596b82; font-size: 10px; }
+.summary dd {
+  overflow: hidden;
+  margin: 0;
+  color: #344a63;
+  font-family: "Noto Sans Mono", Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

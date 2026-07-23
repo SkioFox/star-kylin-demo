@@ -1,0 +1,61 @@
+<RCC>
+  <qresource prefix="/config">
+    <file alias="manifest.json">manifest.json</file>
+  </qresource>
+  <qresource prefix="/qml">
+    <file alias="Main.qml">../qml/Main.qml</file>
+    <file alias="Theme.qml">../qml/Theme.qml</file>
+    <file alias="LoginPage.qml">../qml/LoginPage.qml</file>
+    <file alias="AppShell.qml">../qml/AppShell.qml</file>
+    <file alias="WorkbenchPage.qml">../qml/WorkbenchPage.qml</file>
+    <file alias="WebModulePage.qml">../qml/WebModulePage.qml</file>
+    <file alias="KlineModulePage.qml">../qml/KlineModulePage.qml</file>
+    <file alias="ConfigErrorPage.qml">../qml/ConfigErrorPage.qml</file>
+    <file alias="components/IconGlyph.qml">../qml/components/IconGlyph.qml</file>
+    <file alias="components/IconButton.qml">../qml/components/IconButton.qml</file>
+    <file alias="components/StyledButton.qml">../qml/components/StyledButton.qml</file>
+    <file alias="components/NavButton.qml">../qml/components/NavButton.qml</file>
+    <file alias="components/StatusTrack.qml">../qml/components/StatusTrack.qml</file>
+    <file alias="components/Sidebar.qml">../qml/components/Sidebar.qml</file>
+    <file alias="components/TaskTabs.qml">../qml/components/TaskTabs.qml</file>
+    <file alias="components/ModuleCard.qml">../qml/components/ModuleCard.qml</file>
+    <file alias="components/ModuleState.qml">../qml/components/ModuleState.qml</file>
+    <file alias="components/NativeDialog.qml">../qml/components/NativeDialog.qml</file>
+    <file alias="components/Toast.qml">../qml/components/Toast.qml</file>
+  </qresource>
+  <qresource prefix="/icons">
+    <file alias="arrow-left.svg">icons/arrow-left.svg</file>
+    <file alias="arrow-right.svg">icons/arrow-right.svg</file>
+    <file alias="badge-check.svg">icons/badge-check.svg</file>
+    <file alias="calculator.svg">icons/calculator.svg</file>
+    <file alias="chart-candlestick.svg">icons/chart-candlestick.svg</file>
+    <file alias="chevron-down.svg">icons/chevron-down.svg</file>
+    <file alias="database.svg">icons/database.svg</file>
+    <file alias="eye.svg">icons/eye.svg</file>
+    <file alias="eye-off.svg">icons/eye-off.svg</file>
+    <file alias="globe-2.svg">icons/globe-2.svg</file>
+    <file alias="landmark.svg">icons/landmark.svg</file>
+    <file alias="layout-dashboard.svg">icons/layout-dashboard.svg</file>
+    <file alias="lock-keyhole.svg">icons/lock-keyhole.svg</file>
+    <file alias="log-out.svg">icons/log-out.svg</file>
+    <file alias="monitor-up.svg">icons/monitor-up.svg</file>
+    <file alias="refresh-cw.svg">icons/refresh-cw.svg</file>
+    <file alias="server.svg">icons/server.svg</file>
+    <file alias="shield-check.svg">icons/shield-check.svg</file>
+    <file alias="triangle-alert.svg">icons/triangle-alert.svg</file>
+    <file alias="user-round.svg">icons/user-round.svg</file>
+    <file alias="x.svg">icons/x.svg</file>
+  </qresource>
+  <qresource prefix="/web-demo">
+    <file alias="index.html">web-demo/index.html</file>
+    <file alias="styles.css">web-demo/styles.css</file>
+  </qresource>
+  <qresource prefix="/web-kline">
+    <file alias="index.html">web-kline/index.html</file>
+    <file alias="styles.css">web-kline/styles.css</file>
+    <file alias="kline.js">web-kline/kline.js</file>
+    <file alias="mock-market.json">web-kline/mock-market.json</file>
+    <file alias="mock-market.js">web-kline/mock-market.js</file>
+    <file alias="echarts.min.js">web-kline/echarts.min.js</file>
+  </qresource>
+</RCC>

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "users": {
+    "demoA": {
+      "password": "demo-only",
+      "displayName": "演示用户 A",
+      "role": "综合柜员"
+    },
+    "demoB": {
+      "password": "demo-only",
+      "displayName": "演示用户 B",
+      "role": "运营主管"
+    }
+  },
+  "roles": {
+    "综合柜员": ["appWeb", "appKline"],
+    "运营主管": ["appWeb", "appNative"]
+  },
+  "modules": [
+    {
+      "id": "appWeb",
+      "type": "web",
+      "name": "Web 业务",
+      "description": "指定业务页面",
+      "icon": "globe-2",
+      "status": "授权来源可用",
+      "accent": "#0B5CAD",
+      "tint": "#EAF2FC",
+      "entryUrl": "qrc:/web-demo/index.html",
+      "allowedLocalPrefixes": ["qrc:/web-demo/"],
+      "allowedNavigationOrigins": [],
+      "allowedResourceOrigins": []
+    },
+    {
+      "id": "appNative",
+      "type": "native",
+      "name": "本机工具",
+      "description": "指定麒麟应用",
+      "icon": "calculator",
+      "status": "等待本机检测",
+      "accent": "#9A651A",
+      "tint": "#FBF1DF",
+      "program": "/opt/star-kylin-demo/not-configured",
+      "args": []
+    },
+    {
+      "id": "appKline",
+      "type": "kline",
+      "name": "行情中心",
+      "description": "本地 Mock 行情",
+      "icon": "chart-candlestick",
+      "status": "本地数据可用",
+      "accent": "#1C7F8F",
+      "tint": "#E4F2F4",
+      "entryUrl": "qrc:/web-kline/index.html"
+    }
+  ]
+}
