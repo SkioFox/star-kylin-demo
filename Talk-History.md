@@ -88,7 +88,7 @@ K 线图怎么实现? → 内嵌 web 图表库、原生
 
 ## 架构问题
 
-  Intel x86_64 机器上可以通过以下方式交叉生成ARM64 .deb：
+### Intel x86_64 机器上可以通过以下方式交叉生成ARM64 .deb：
 
   - 使用 aarch64-linux-gnu 交叉编译器。
   - 准备完整的 ARM64 sysroot。
@@ -108,7 +108,9 @@ K 线图怎么实现? → 内嵌 web 图表库、原生
 
 Intel 机器只能完成交叉编译验证，不能替代真机验收。ARM Mac 可以更可靠地生成 Linux ARM64 .deb，但仍有边界。
 
-Apple Silicon 本身运行 macOS，不能直接用 macOS 编译器生成麒麟 Linux 二进制。不过通过：
+### Apple Silicon 本身运行 macOS，不能直接用 macOS 编译器生成麒麟 Linux 二进制。
+ 
+ 通过docker容器运行：
 
   docker run --platform linux/arm64 ...
 
@@ -134,7 +136,7 @@ Apple Silicon 本身运行 macOS，不能直接用 macOS 编译器生成麒麟 L
 
   预期分别看到 arm64、ARM aarch64 和 AArch64。ARM Mac能很好地解决 ARM64 构建问题，但 x86_64 最终包仍建议使用 x86_64 Linux/麒麟构建通道。
 
-在 ARM Mac 上应使用：
+### 在 ARM Mac 上应使用：
 
   docker run --platform linux/arm64 ...
 
@@ -162,7 +164,7 @@ Apple Silicon 本身运行 macOS，不能直接用 macOS 编译器生成麒麟 L
 
 因此结论是：ARM Mac 可以承担 ARM64 .deb 的开发构建和验证，前提是使用真正的 ARM64 Linux/Qt 构建环境；x86_64 包继续由 Intel Mac 或 x86_64 Linux/麒麟环境生成。
 
-现在本地这个star-kylin-demo_0.1.0_amd64.deb是通过同样方式生成
+### 现在本地这个star-kylin-demo_0.1.0_amd64.deb是通过同样方式生成
 
   mvp-demo/app/dist/amd64/star-kylin-demo_0.1.0_amd64.deb
 
@@ -179,3 +181,56 @@ Apple Silicon 本身运行 macOS，不能直接用 macOS 编译器生成麒麟 L
   ARM Mac 可以复制这套流程，只需要换成真正的 ARM64 Ubuntu/麒麟 Qt 构建镜像，并执行：STAR_KYLIN_EXPECTED_DEB_ARCH=arm64 ./tools/build-deb.sh
 
   这样两个包的构建流程就是对称的：Intel Mac 产出 amd64，ARM Mac 产出 arm64。
+
+### Intel Mac生成x86 deb流程
+
+通过x86_64 Docker 构建镜像完成, 不是直接用 macOS 编译器。
+
+  本机环境当：
+
+  Mac CPU: Intel x86_64
+  Docker: x86_64 Linux VM
+  容器系统: Ubuntu 22.04 x86_64
+  Qt: 5.15 + QtWebEngine
+  构建工具: CMake + Ninja + CTest + CPack
+
+  实际执行方式等价于：
+
+  cd star-kylin-demo
+
+  docker run --rm \
+    -v "$PWD/mvp-demo/app:/workspace" \
+    -w /workspace \
+    -e STAR_KYLIN_EXPECTED_DEB_ARCH=amd64 \
+    -e STAR_KYLIN_BUILD_DIR=/workspace/build-verify \
+    -e STAR_KYLIN_STAGING_DIR=/workspace/staging-script-
+    amd64 \
+    -e STAR_KYLIN_OUTPUT_DIR=/workspace/dist/amd64 \
+    star-kylin-qt-smoke:qt5-packaging \
+    ./tools/build-deb.sh
+
+  其中 star-kylin-qt-smoke:qt5-packaging 是你本机当时已经存在的 Docker 镜像，里面安装了 Ubuntu、Qt 5.15、QtWebEngine、CMake、Ninja 和 DEB 打包工具。
+
+  mvp-demo/app/tools/build-deb.sh 在容器中依次执行：
+
+  检查 uname -m 为 x86_64
+          ↓
+  映射 Debian 架构为 amd64
+          ↓
+  CMake Release 配置
+          ↓
+  CMake install 生成 staging
+          ↓
+  CPack 生成 amd64.deb
+          ↓
+  dpkg-deb 检查 Architecture=amd64
+          ↓
+  生成 SHA-256
+
+  项目目录通过 Docker bind mount 映射到 /workspace，所以容器生成的文件会直接出现在宿主机：
+
+  mvp-demo/app/dist/amd64/
+  ├── star-kylin-demo_0.1.0_amd64.deb
+  └── star-kylin-demo_0.1.0_amd64.deb.sha256
+
+  整个二进制编译和 DEB 打包都发生在 x86_64 Ubuntu 容器中，macOS 只负责运行 Docker 和保存源码、产物。
