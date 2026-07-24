@@ -63,6 +63,10 @@ if [[ "$actual_arch" != "$deb_arch" ]]; then
   exit 1
 fi
 
-(cd "$output_dir" && sha256sum "$(basename "$package_path")" >"$(basename "$package_path").sha256")
+checksum_path="$package_path"
+if [[ "$package_path" == "$root_dir/"* ]]; then
+  checksum_path="${package_path#"$root_dir"/}"
+fi
+(cd "$root_dir" && sha256sum "$checksum_path") >"$package_path.sha256"
 dpkg-deb --info "$package_path"
 printf 'Package: %s\nChecksum: %s.sha256\n' "$package_path" "$package_path"

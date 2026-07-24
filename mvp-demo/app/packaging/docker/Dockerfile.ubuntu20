@@ -1,0 +1,32 @@
+# Ubuntu 20.04 备选构建环境
+# 用途:客户 glibc 基线确认后，作为较低 glibc 候选基座进行重建与依赖检查
+# 说明:Ubuntu 20.04 自带 Qt 5.12(非 5.15),CMakeLists.txt 已兼容双版本
+#      不能预先承诺生成的 libc6 最低版本；必须检查实际 DEB Depends 和客户机安装结果
+# 使用: docker build --platform linux/amd64 -f packaging/docker/Dockerfile.ubuntu20 -t star-kylin-build:ubuntu20 .
+#       docker run --rm --platform linux/amd64 -v "$PWD:/workspace" -w /workspace \
+#         -e STAR_KYLIN_EXPECTED_DEB_ARCH=amd64 star-kylin-build:ubuntu20 ./tools/build-deb.sh
+
+FROM ubuntu:20.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends --yes \
+        build-essential \
+        ca-certificates \
+        cmake \
+        dpkg-dev \
+        file \
+        ninja-build \
+        libqt5svg5-dev \
+        qml-module-qtquick2 \
+        qml-module-qtquick-controls2 \
+        qml-module-qtquick-window2 \
+        qml-module-qtwebengine \
+        qtbase5-dev \
+        qtdeclarative5-dev \
+        qtquickcontrols2-5-dev \
+        qtwebengine5-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace

@@ -414,12 +414,16 @@ QML 不直接读取 Manifest、不自行拼 URL、不直接创建 QProcess。所
 cat /etc/os-release
 uname -m
 uname -r
+getconf GNU_LIBC_VERSION
+dpkg --print-architecture
 echo "$XDG_SESSION_TYPE"
 cmake --version
 gcc --version
 qmake -v
 qtpaths --qt-version
-dpkg-query -W 'qt*' | sort
+dpkg-query -W -f='${binary:Package}\t${Version}\n' \
+  libc6 libqt5core5a libqt5qml5 libqt5webengine5 libqt5webenginecore5
+find /usr -name QtWebEngineProcess -type f 2>/dev/null
 ```
 
 还需确认 QtWebEngine 运行示例、中文字体、输入法、GPU 渲染和软件渲染回退是否正常。T0A 输出写入后续真机验收记录，不回填生产级文档。
@@ -427,7 +431,7 @@ dpkg-query -W 'qt*' | sort
 ### 9.2 架构策略
 
 - MVP 的权威交付架构固定为 ARM64 与 x86_64；两类验收机仍须分别通过 `uname -m` 记录具体 CPU/环境基线。
-- 若只能先提供一台机器，可优先推进 ARM64 飞腾/鲲鹏验证，但不能因此关闭 x86_64 交付门禁。
+- 当前已有客户 amd64 参考机时，应优先关闭 amd64 T0A；ARM64 仍为双架构交付门禁，待真机到位后关闭。ADR 的 ARM64 战略优先级不替代当前验收机排序。
 - C++/QML 代码不得包含架构分支；第三方资源必须是纯 JS/SVG/数据或有对应架构包。
 - ARM64 与 x86_64 需要两个独立安装包，不制作所谓“通用二进制”：
   - `star-kylin-demo_<version>_arm64.deb`
@@ -564,6 +568,7 @@ T1.1–T1.4 的开发骨架可用后，T2 与 T3 可以并行开发，但三者�
 | 中文字体或 DPI 差异 | 截断、字形替换、控件错位 | T0A 锁字体；必要时随包提供已批准字体并重新截图验收 |
 | 原生程序路径跨镜像不同 | 文件不存在或不可执行 | 每个验收镜像冻结一份编译期 Manifest，不做运行时路径搜索 |
 | 外网到内网反馈慢 | 修复验证周期过长 | x86 麒麟 VM 前移冒烟；依赖和构建工具全量离线化 |
+| glibc 版本不兼容 | 当前 Ubuntu 22.04 构建的 `.deb` 声明 `libc6 (>= 2.34)`；客户 glibc 版本尚未提供，内核版本不能用于推导 | T0A 用 `getconf GNU_LIBC_VERSION` 和 `dpkg-query -W libc6` 核实；若不满足，以不高于客户 glibc 的基座/sysroot 重建并检查实际 DEB 依赖，Ubuntu 20.04 仅为待验证候选 |
 
 ## 13. 开工前必须回填
 
