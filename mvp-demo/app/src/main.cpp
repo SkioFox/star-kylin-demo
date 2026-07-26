@@ -15,13 +15,18 @@
 
 int main(int argc, char *argv[])
 {
-#if QT_VERSION_MAJOR >= 6
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+#elif QT_VERSION_MAJOR >= 6
     QtWebEngineQuick::initialize();
 #else
     QtWebEngine::initialize();
 #endif
 
     QGuiApplication application(argc, argv);
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    QtWebEngine::initialize();
+#endif
     QCoreApplication::setApplicationName(QStringLiteral("star-kylin-demo"));
     QCoreApplication::setApplicationVersion(QStringLiteral("0.1.0"));
     QCoreApplication::setOrganizationName(QStringLiteral("Star Kylin Demo"));

@@ -72,7 +72,11 @@ bool isSafeQrcUrl(const QString &value)
         || !url.path().startsWith(QLatin1Char('/'))) {
         return false;
     }
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    const QStringList segments = url.path().split(QLatin1Char('/'), QString::SkipEmptyParts);
+#else
     const QStringList segments = url.path().split(QLatin1Char('/'), Qt::SkipEmptyParts);
+#endif
     return !segments.contains(QStringLiteral("..")) && !segments.contains(QStringLiteral("."));
 }
 

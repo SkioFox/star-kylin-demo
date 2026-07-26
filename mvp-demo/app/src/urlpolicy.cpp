@@ -8,7 +8,11 @@ QString decodedPath(const QUrl &url)
     if (!path.startsWith(QLatin1Char('/'))) {
         return {};
     }
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    const QStringList segments = path.split(QLatin1Char('/'), QString::KeepEmptyParts);
+#else
     const QStringList segments = path.split(QLatin1Char('/'), Qt::KeepEmptyParts);
+#endif
     if (segments.contains(QStringLiteral(".")) || segments.contains(QStringLiteral(".."))) {
         return {};
     }

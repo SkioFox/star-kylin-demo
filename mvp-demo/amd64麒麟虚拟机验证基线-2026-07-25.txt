@@ -1,0 +1,67 @@
+=== provenance ===
+scope=local VirtualBox pre-validation VM; not customer reference evidence
+2026-07-25T00:36:24+08:00
+=== os-release ===
+NAME="Kylin"
+VERSION="银河麒麟桌面操作系统V10 SP1"
+VERSION_US="Kylin Linux Desktop V10 SP1"
+ID=kylin
+ID_LIKE=debian
+PRETTY_NAME="Kylin V10 SP1"
+VERSION_ID="v10"
+HOME_URL="http://www.kylinos.cn/"
+SUPPORT_URL="http://www.kylinos.cn/support/technology.html"
+BUG_REPORT_URL="http://www.kylinos.cn/"
+PRIVACY_POLICY_URL="http://www.kylinos.cn"
+VERSION_CODENAME=kylin
+UBUNTU_CODENAME=kylin
+PROJECT_CODENAME=V10SP1
+KYLIN_RELEASE_ID="2503"
+=== architecture ===
+x86_64
+5.10.0-18-generic
+amd64
+=== glibc ===
+glibc 2.31
+libc6:amd64	2.31-0kylin9.2k0.3
+=== session ===
+XDG_SESSION_TYPE=tty
+=== qt tools ===
+sh: 18: qmake: not found
+sh: 19: qtpaths: not found
+=== qt runtime packages ===
+libc6:amd64	2.31-0kylin9.2k0.3
+libqt5core5a:amd64	5.12.12+dfsg-0kylin1k1.54
+libqt5qml5:amd64	5.12.12-0kylin1k0.3
+libqt5webengine5	
+libqt5webenginecore5:amd64	5.12.12-0kylin1k0.9
+=== qt webengine packages ===
+libqt5webengine-data	5.12.12-0kylin1k0.9
+libqt5webengine5	
+libqt5webenginecore5:amd64	5.12.12-0kylin1k0.9
+libqt5webenginewidgets5:amd64	5.12.12-0kylin1k0.9
+qtwebengine-abi-5-12-8	
+=== qml packages ===
+qml-module-org-kde-extensionplugin	
+qml-module-org-kde-kconfig:amd64	5.68.0-0kylin2
+qml-module-org-kde-kirigami2	5.68.0-0kylin2
+qml-module-org-kde-kquickcontrols:amd64	5.68.0-0kylin2
+qml-module-org-kde-kquickcontrolsaddons:amd64	5.68.0-0kylin2
+qml-module-org-kde-newstuff:amd64	5.68.0-0kylin2
+qml-module-org-kde-runnermodel	
+qml-module-org-ukui-qqc2desktopstyle	3.24.0.0-0k3.25
+qml-module-org-ukui-stylehelper	3.24.0.0-0k3.25
+qml-module-qtgraphicaleffects:amd64	5.12.12-0kylin1k0.2
+qml-module-qtmultimedia:amd64	5.12.12-0kylin1k0.2
+qml-module-qtqml-models2:amd64	5.12.12-0kylin1k0.3
+qml-module-qtquick-controls:amd64	5.12.12-0kylin1k0.2
+qml-module-qtquick-controls2:amd64	5.12.12-0kylin1k0.3
+qml-module-qtquick-dialogs:amd64	5.12.12-0kylin1k0.2
+qml-module-qtquick-layouts:amd64	5.12.12-0kylin1k0.3
+qml-module-qtquick-privatewidgets:amd64	5.12.12-0kylin1k0.2
+qml-module-qtquick-templates2:amd64	5.12.12-0kylin1k0.3
+qml-module-qtquick-virtualkeyboard	
+qml-module-qtquick-window2:amd64	5.12.12-0kylin1k0.3
+qml-module-qtquick2:amd64	5.12.12-0kylin1k0.3
+=== webengine process ===
+/usr/lib/x86_64-linux-gnu/qt5/libexec/QtWebEngineProcess

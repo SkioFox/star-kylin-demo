@@ -1,20 +1,17 @@
 import QtQuick 2.12
-import QtWebEngine 1.10
+import QtWebEngine 1.8
 import StarKylin 1.0
 import "components"
 
 Rectangle {
     id: root
     color: Theme.surface
+    property string moduleId: ""
     property string pageState: "loading"
     property string errorSummary: qsTr("指定页面暂时无法打开。")
     property string blockedMessage: ""
-    property bool moduleOpen: false
-    readonly property url entryUrl: moduleOpen ? appController.moduleEntryUrl("appWeb") : ""
-
-    function syncModuleOpen() {
-        moduleOpen = appController.tabModel.indexOf("appWeb") >= 0
-    }
+    readonly property url entryUrl: moduleId.length > 0 ? appController.moduleEntryUrl(moduleId) : ""
+    readonly property bool localEntry: entryUrl.toString().indexOf("qrc:") === 0
 
     function reloadPage() {
         blockedMessage = ""
@@ -39,7 +36,7 @@ Rectangle {
             IconButton { iconName: "arrow-left"; toolTip: qsTr("后退"); enabled: webView.canGoBack; onClicked: webView.goBack() }
             IconButton { iconName: "arrow-right"; toolTip: qsTr("前进"); enabled: webView.canGoForward; onClicked: webView.goForward() }
             IconButton { iconName: "refresh-cw"; toolTip: qsTr("刷新"); onClicked: root.reloadPage() }
-            Text { leftPadding: 12; text: qsTr("指定业务系统"); color: Theme.text900; font.family: Theme.uiFont; font.pixelSize: 14; font.weight: Font.DemiBold; anchors.verticalCenter: parent.verticalCenter }
+            Text { leftPadding: 12; text: root.localEntry ? qsTr("指定业务系统") : qsTr("受控互联网页面"); color: Theme.text900; font.family: Theme.uiFont; font.pixelSize: 14; font.weight: Font.DemiBold; anchors.verticalCenter: parent.verticalCenter }
         }
         Row {
             anchors.right: parent.right
@@ -47,7 +44,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             spacing: 7
             IconGlyph { iconName: "globe-2"; glyphColor: Theme.success; glyphSize: 14; anchors.verticalCenter: parent.verticalCenter }
-            Text { text: qsTr("演示来源：本地 qrc 页面"); color: Theme.text600; font.family: Theme.uiFont; font.pixelSize: 12 }
+            Text { text: root.localEntry ? qsTr("演示来源：本地 qrc 页面") : qsTr("演示来源：受控 HTTPS 地址"); color: Theme.text600; font.family: Theme.uiFont; font.pixelSize: 12 }
         }
     }
 
@@ -77,7 +74,7 @@ Rectangle {
         WebEngineView {
             id: webView
             anchors.fill: parent
-            profile: webProfiles.businessProfile
+            profile: webProfiles.webProfile(root.moduleId)
             url: root.entryUrl
             backgroundColor: Theme.surface
             visible: root.pageState === "loading" || root.pageState === "ready"
@@ -97,7 +94,7 @@ Rectangle {
                 }
             }
             onNavigationRequested: function(request) {
-                if (webProfiles.isNavigationAllowed("appWeb", request.url)) {
+                if (webProfiles.isNavigationAllowed(root.moduleId, request.url)) {
                     request.action = WebEngineView.AcceptRequest
                 } else {
                     request.action = WebEngineView.IgnoreRequest
@@ -105,7 +102,7 @@ Rectangle {
                 }
             }
             onNewViewRequested: function(request) {
-                if (webProfiles.isNavigationAllowed("appWeb", request.requestedUrl)) {
+                if (webProfiles.isNavigationAllowed(root.moduleId, request.requestedUrl)) {
                     webView.url = request.requestedUrl
                 } else {
                     root.blockedMessage = qsTr("已阻止打开未授权地址，原业务页面保持不变。")
@@ -165,17 +162,4 @@ Rectangle {
         }
     }
 
-    Connections {
-        target: appController
-        function onActiveModuleIdChanged() {
-            if (appController.activeModuleId === "appWeb") root.moduleOpen = true
-        }
-    }
-
-    Connections {
-        target: appController.tabModel
-        function onCountChanged() { root.syncModuleOpen() }
-    }
-
-    Component.onCompleted: syncModuleOpen()
 }

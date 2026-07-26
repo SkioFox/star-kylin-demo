@@ -1,5 +1,5 @@
 import QtQuick 2.12
-import QtWebEngine 1.10
+import QtWebEngine 1.8
 import StarKylin 1.0
 import "components"
 
@@ -9,13 +9,10 @@ Rectangle {
     property string period: "day"
     property string pageState: "loading"
     property string errorSummary: qsTr("行情页面暂时无法打开。")
-    property bool moduleOpen: false
+    readonly property bool moduleOpen: appController.tabModel.count > 1
+                                    && appController.tabModel.indexOf("appKline") >= 0
     readonly property string baseEntryUrl: appController.moduleEntryUrl("appKline").toString()
     readonly property url entryUrl: moduleOpen ? baseEntryUrl + "?period=" + period : ""
-
-    function syncModuleOpen() {
-        moduleOpen = appController.tabModel.indexOf("appKline") >= 0
-    }
 
     function selectPeriod(nextPeriod) {
         period = nextPeriod
@@ -162,17 +159,4 @@ Rectangle {
         }
     }
 
-    Connections {
-        target: appController
-        function onActiveModuleIdChanged() {
-            if (appController.activeModuleId === "appKline") root.moduleOpen = true
-        }
-    }
-
-    Connections {
-        target: appController.tabModel
-        function onCountChanged() { root.syncModuleOpen() }
-    }
-
-    Component.onCompleted: syncModuleOpen()
 }

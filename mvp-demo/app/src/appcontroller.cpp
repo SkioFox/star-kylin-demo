@@ -153,6 +153,12 @@ bool AppController::closeTab(const QString &id)
     return m_authenticated && m_tabModel.close(id);
 }
 
+bool AppController::isWebModule(const QString &id) const
+{
+    const ModuleDefinition *module = m_moduleModel.find(id);
+    return module && module->type == QStringLiteral("web");
+}
+
 QUrl AppController::moduleEntryUrl(const QString &id) const
 {
     if (!m_authenticated) {

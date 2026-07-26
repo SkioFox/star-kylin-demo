@@ -20,6 +20,19 @@ private slots:
             QVERIFY2(QFile::exists(path), qPrintable(path));
         }
     }
+
+    void webPagesUseQt512CompatibleImport()
+    {
+        const QStringList paths = {QStringLiteral(":/qml/WebModulePage.qml"),
+                                   QStringLiteral(":/qml/KlineModulePage.qml")};
+        for (const QString &path : paths) {
+            QFile file(path);
+            QVERIFY2(file.open(QIODevice::ReadOnly | QIODevice::Text), qPrintable(path));
+            const QString content = QString::fromUtf8(file.readAll());
+            QVERIFY2(content.contains(QStringLiteral("import QtWebEngine 1.8")),
+                     qPrintable(path));
+        }
+    }
 };
 
 QTEST_APPLESS_MAIN(ResourcesTest)

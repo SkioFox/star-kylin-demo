@@ -1,10 +1,12 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
+import QtQuick.Window 2.12
 import StarKylin 1.0
 
 ApplicationWindow {
     id: window
     visible: true
+    visibility: Window.Maximized
     width: 1280
     height: 800
     minimumWidth: 820

@@ -13,7 +13,7 @@
     }
   },
   "roles": {
-    "综合柜员": ["appWeb", "appKline"],
+    "综合柜员": ["appWeb", "appBaidu", "appKline"],
     "运营主管": ["appWeb", "appNative"]
   },
   "modules": [
@@ -42,6 +42,20 @@
       "tint": "#FBF1DF",
       "program": "/opt/star-kylin-demo/not-configured",
       "args": []
+    },
+    {
+      "id": "appBaidu",
+      "type": "web",
+      "name": "互联网示例",
+      "description": "受控 HTTPS 演示页面",
+      "icon": "globe-2",
+      "status": "仅演示环境可用",
+      "accent": "#466A8F",
+      "tint": "#EAF2FC",
+      "entryUrl": "https://www.baidu.com/",
+      "allowedLocalPrefixes": [],
+      "allowedNavigationOrigins": ["https://www.baidu.com"],
+      "allowedResourceOrigins": ["https://www.baidu.com"]
     },
     {
       "id": "appKline",

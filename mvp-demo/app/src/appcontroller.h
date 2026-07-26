@@ -48,6 +48,7 @@ public:
     Q_INVOKABLE bool openModule(const QString &id);
     Q_INVOKABLE bool activateTab(const QString &id);
     Q_INVOKABLE bool closeTab(const QString &id);
+    Q_INVOKABLE bool isWebModule(const QString &id) const;
     Q_INVOKABLE QUrl moduleEntryUrl(const QString &id) const;
     Q_INVOKABLE void retryNativeModule();
     Q_INVOKABLE void quit();

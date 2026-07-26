@@ -141,7 +141,11 @@ Rectangle {
             anchors.bottom: parent.bottom
 
             WorkbenchPage { anchors.fill: parent; visible: appController.activeModuleId === "workbench" }
-            WebModulePage { anchors.fill: parent; visible: appController.activeModuleId === "appWeb" }
+            WebModulePage {
+                anchors.fill: parent
+                moduleId: appController.activeModuleId
+                visible: appController.isWebModule(appController.activeModuleId)
+            }
             KlineModulePage { anchors.fill: parent; visible: appController.activeModuleId === "appKline" }
         }
     }
