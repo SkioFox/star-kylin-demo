@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>麒麟工作台 - UI 原型</title>
+  <link rel="icon" href="assets/landmark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="application-shell" aria-label="麒麟工作台交互原型">
+    <header class="work-rail">
+      <div class="brand-lockup">
+        <span class="brand-mark"><img src="assets/landmark.svg" alt=""></span>
+        <span>麒麟工作台</span>
+        <span class="workspace-name">运营与研究工作区</span>
+      </div>
+      <div class="rail-status" aria-label="当前工作状态">
+        <span><i class="dot dot-gold"></i>运营主管</span>
+        <span><i class="dot dot-teal"></i>服务 6/7</span>
+        <span><i class="dot dot-green"></i>网络正常</span>
+        <button class="avatar" type="button" title="打开用户菜单">周</button>
+      </div>
+    </header>
+
+    <aside class="sidebar" aria-label="模块导航">
+      <button class="nav-item" type="button" data-view="dashboard">
+        <img src="assets/layout-dashboard.svg" alt=""><span>我的工作</span>
+      </button>
+      <p class="nav-group">市场观察</p>
+      <button class="nav-item active" type="button" data-view="watchlist" aria-current="page"><img src="assets/eye.svg" alt=""><span>自选</span></button>
+      <button class="nav-item" type="button" data-view="stock"><img src="assets/chart-candlestick.svg" alt=""><span>个股研究</span></button>
+      <button class="nav-item" type="button" data-view="market"><img src="assets/database.svg" alt=""><span>市场行情</span></button>
+      <button class="nav-item" type="button" data-view="global"><img src="assets/globe-2.svg" alt=""><span>全球市场</span></button>
+      <button class="nav-item" type="button" data-view="futures"><img src="assets/monitor-up.svg" alt=""><span>期货观察</span></button>
+      <button class="nav-item" type="button" data-view="gold"><img src="assets/landmark.svg" alt=""><span>黄金业务</span></button>
+      <p class="nav-group">应用服务</p>
+      <button class="nav-item" type="button" data-view="web"><img src="assets/shield-check.svg" alt=""><span>指定业务</span></button>
+      <button class="nav-item" type="button" data-view="external"><img src="assets/globe-2.svg" alt=""><span>在线网页</span></button>
+      <button class="nav-item" type="button" data-view="network"><img src="assets/server.svg" alt=""><span>网络验证</span></button>
+      <p class="nav-group">原生能力</p>
+      <button class="nav-item" type="button" data-view="nativeMarket"><img src="assets/chart-candlestick.svg" alt=""><span>原生行情中心</span></button>
+      <button class="nav-item" type="button" data-view="native"><img src="assets/calculator.svg" alt=""><span>本机应用集成</span></button>
+      <div class="sidebar-footer"><span>会话有效</span><strong>28:41</strong></div>
+    </aside>
+
+    <section class="workspace">
+      <nav class="task-tabs" aria-label="已打开任务">
+        <button class="task-tab" type="button" data-view="dashboard">工作台</button>
+        <button class="task-tab active" type="button" data-view="watchlist">自选 <span class="tab-close">×</span></button>
+        <button class="task-tab" type="button" data-view="stock">个股研究 <span class="tab-close">×</span></button>
+      </nav>
+
+      <section class="context-bar" aria-label="当前模块工具栏">
+        <div><strong id="view-title">自选</strong><span id="view-subtitle">默认关注 · 8 个标的</span></div>
+        <div class="context-actions">
+          <button class="icon-button" type="button" title="筛选">⌘</button>
+          <button class="secondary-button" type="button" id="refresh-button"><img src="assets/refresh-cw.svg" alt="">刷新数据</button>
+          <span class="update-time" id="update-time">更新于 10:24:18</span>
+        </div>
+      </section>
+
+      <section class="view-stage" id="view-stage">
+        <section class="market-workspace">
+          <div class="data-pane">
+            <div class="table-header-line"><span>默认关注</span><button type="button" class="plain-button">管理分组</button></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>标的</th><th>最新价</th><th>涨跌幅</th><th>涨跌额</th><th>成交额</th><th>所属分类</th></tr></thead>
+                <tbody id="quote-body"></tbody>
+              </table>
+            </div>
+            <div class="table-footnote"><span>共 8 个标的</span><span>双击行可进入个股研究</span></div>
+          </div>
+          <aside class="detail-pane" aria-label="标的详情">
+            <div class="detail-heading"><span>标的详情</span><button class="icon-button" type="button" title="更多操作">•••</button></div>
+            <div class="instrument"><p id="instrument-code">000001</p><h1 id="instrument-name">平安银行</h1><div><strong id="instrument-price">11.24</strong><span id="instrument-change" class="negative">-0.36%</span></div></div>
+            <div class="mini-chart" aria-label="价格趋势图"><svg id="sparkline" viewBox="0 0 300 102" role="img"><title>平安银行当日价格走势</title><path class="grid" d="M0 26H300M0 51H300M0 76H300"></path><path id="sparkline-path" d="M0,61 C25,51 42,78 68,60 S110,30 137,46 S182,76 204,52 S258,20 300,39"></path></svg><span>09:30</span><span>15:00</span></div>
+            <dl class="key-facts"><div><dt>开盘</dt><dd>11.30</dd></div><div><dt>最高</dt><dd>11.36</dd></div><div><dt>最低</dt><dd>11.18</dd></div><div><dt>成交量</dt><dd>2.48 亿</dd></div></dl>
+            <div class="detail-section"><h2>相关资讯</h2><a href="#">银行板块成交活跃，资金流向保持分化</a><a href="#">市场观察：关注利率与流动性变化</a><a href="#">今日机构调研动态</a></div>
+          </aside>
+        </section>
+      </section>
+
+      <footer class="market-strip" aria-label="市场状态带">
+        <span>沪深 300 <b class="negative">3,821.40 -0.42%</b></span>
+        <span>中证银行 <b class="positive">4,311.08 +0.36%</b></span>
+        <span>恒生指数 <b class="negative">17,862.14 -0.51%</b></span>
+        <span class="strip-message"><i class="dot dot-teal"></i>行情订阅稳定</span>
+      </footer>
+    </section>
+  </main>
+  <section class="login-screen" id="login-screen" aria-label="登录工作台">
+    <div class="login-brand">
+      <div class="login-mark"><img src="assets/landmark.svg" alt=""></div>
+      <span class="gold-rule"></span>
+      <p class="eyebrow">统一业务与市场观察入口</p>
+      <h1>麒麟工作台</h1>
+      <p class="login-copy">在同一工作区处理授权应用、市场研究和本机工具，当前会话状态始终可见。</p>
+      <ul><li>统一会话与权限加载</li><li>受控业务系统接入</li><li>原生行情与工具协同</li></ul>
+      <p class="login-env">内部演示环境</p>
+    </div>
+    <form class="login-form" id="login-form">
+      <div class="form-heading"><p>工作账号登录</p><h2>进入工作台</h2><span>请使用已分配的工作账号。</span></div>
+      <label>用户名<input id="username" name="username" autocomplete="username" placeholder="输入用户名" required></label>
+      <label>密码<input id="password" name="password" type="password" autocomplete="current-password" placeholder="输入密码" required></label>
+      <p class="form-error" id="login-error" role="alert"></p>
+      <button class="login-button" id="login-button" type="submit">登录工作台</button>
+      <p class="form-note">登录后将加载当前账号获授权的应用入口。</p>
+    </form>
+  </section>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
