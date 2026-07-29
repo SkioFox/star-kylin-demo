@@ -1,0 +1,24 @@
+<RCC>
+  <qresource prefix="/qml">
+    <file alias="Main.qml">../qml/Main.qml</file>
+    <file alias="Theme.qml">../qml/Theme.qml</file>
+    <file alias="LoginPage.qml">../qml/LoginPage.qml</file>
+    <file alias="AppShell.qml">../qml/AppShell.qml</file>
+    <file alias="MarketWorkspace.qml">../qml/MarketWorkspace.qml</file>
+    <file alias="KlinePanel.qml">../qml/KlinePanel.qml</file>
+    <file alias="WebModulePage.qml">../qml/WebModulePage.qml</file>
+    <file alias="ServicePage.qml">../qml/ServicePage.qml</file>
+    <file alias="ResearchWorkspace.qml">../qml/ResearchWorkspace.qml</file>
+    <file alias="ConfigErrorPage.qml">../qml/ConfigErrorPage.qml</file>
+  </qresource>
+  <qresource prefix="/config">
+    <file>manifest.json</file>
+    <file>market-fixtures.json</file>
+  </qresource>
+  <qresource prefix="/web-demo">
+    <file alias="index.html">web-demo/index.html</file>
+  </qresource>
+  <qresource prefix="/icons">
+    <file alias="landmark.svg">icons/landmark.svg</file>
+  </qresource>
+</RCC>

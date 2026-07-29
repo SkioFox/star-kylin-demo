@@ -40,6 +40,12 @@ if [[ -n "${STAR_KYLIN_DEBIAN_RUNTIME_DEPENDS:-}" ]]; then
   )
 fi
 
+if [[ -n "${STAR_KYLIN_PACKAGE_RELEASE:-}" ]]; then
+  cmake_args+=(
+    "-DSTAR_KYLIN_PACKAGE_RELEASE=${STAR_KYLIN_PACKAGE_RELEASE}"
+  )
+fi
+
 cmake "${cmake_args[@]}"
 cmake --build "$build_dir" --parallel "${STAR_KYLIN_BUILD_JOBS:-2}"
 ctest --test-dir "$build_dir" --output-on-failure

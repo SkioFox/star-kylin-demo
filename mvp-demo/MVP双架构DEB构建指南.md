@@ -7,6 +7,8 @@
 
 两个包必须分别在对应架构的麒麟真机验收。Docker 中生成的包是开发/构建验证证据，不能替代麒麟真机验收。
 
+ARM64 的当前状态、原生构建机操作、包校验与麒麟安装验收步骤见 [ARM64麒麟构建与验收任务.md](./ARM64麒麟构建与验收任务.md)。
+
 开发过程中已发生问题、根因、处置和未关闭门禁见 [MVP构建问题与处置记录.md](./MVP构建问题与处置记录.md)。
 
 ## 1. 前置条件
@@ -65,6 +67,14 @@ docker build --platform linux/amd64 \
 
 ```bash
 docker build --platform linux/arm64 \
+  -t star-kylin-build:arm64 packaging/docker
+```
+
+若官方 Ubuntu Ports 源临时不可用，可在开发构建时显式传入已验证、且已获批准的镜像源；最终麒麟交付仍应使用行内批准源：
+
+```bash
+docker build --platform linux/arm64 \
+  --build-arg UBUNTU_PORTS_MIRROR=http://<approved-ubuntu-ports-mirror>/ubuntu-ports \
   -t star-kylin-build:arm64 packaging/docker
 ```
 

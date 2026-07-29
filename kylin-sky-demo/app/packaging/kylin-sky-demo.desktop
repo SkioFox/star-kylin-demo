@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=麒麟工作台
+Comment=麒麟桌面业务工作台演示 v0.1.0
+Exec=/opt/kylin-sky-demo/bin/kylin-sky-demo
+Icon=kylin-sky-demo
+Terminal=false
+Categories=Office;
+StartupNotify=true

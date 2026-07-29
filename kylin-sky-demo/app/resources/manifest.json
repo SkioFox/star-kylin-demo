@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "users": {
+    "operator": {
+      "password": "KylinDemo2026",
+      "displayName": "运营主管",
+      "role": "运营主管"
+    },
+    "auditor": {
+      "password": "AuditDemo2026",
+      "displayName": "审阅人员",
+      "role": "审阅人员"
+    }
+  },
+  "roles": {
+    "运营主管": ["watchlist", "research", "market", "global", "futures", "gold", "web", "external", "network", "native-market"],
+    "审阅人员": ["watchlist", "research", "market", "global", "futures", "gold", "web", "network"]
+  },
+  "modules": [
+    {"id":"watchlist","type":"market","name":"自选","description":"关注标的与报价摘要","group":"市场观察"},
+    {"id":"research","type":"market","name":"个股研究","description":"标的、图表与研究上下文","group":"市场观察"},
+    {"id":"market","type":"market","name":"市场行情","description":"指数、板块与市场概览","group":"市场观察"},
+    {"id":"global","type":"market","name":"全球市场","description":"跨市场观察与指数比较","group":"市场观察"},
+    {"id":"futures","type":"market","name":"期货观察","description":"商品与能源期货观察","group":"市场观察"},
+    {"id":"gold","type":"market","name":"黄金业务","description":"银行黄金演示报价与基准趋势","group":"市场观察"},
+    {
+      "id":"web","type":"web","name":"指定业务","description":"受控业务系统入口","group":"应用服务",
+      "entryUrl":"qrc:/web-demo/index.html","allowedLocalPrefixes":["qrc:/web-demo/"],
+      "allowedNavigationOrigins":[],"allowedResourceOrigins":[]
+    },
+    {
+      "id":"external","type":"web","name":"在线网页","description":"已批准的外部页面","group":"应用服务",
+      "entryUrl":"https://www.baidu.com/","allowedLocalPrefixes":[],
+      "allowedNavigationOrigins":["https://www.baidu.com"],"allowedResourceOrigins":["https://www.baidu.com"]
+    },
+    {"id":"network","type":"network","name":"网络验证","description":"HTTP、HTTPS、SSE 与 WebSocket 状态","group":"应用服务"},
+    {
+      "id":"native-market","type":"native","name":"原生行情中心","description":"启动已批准的本机工具","group":"应用服务",
+      "program":"/usr/bin/ukui-control-center","args":[]
+    }
+  ]
+}

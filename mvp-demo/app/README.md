@@ -53,6 +53,7 @@ STAR_KYLIN_EXPECTED_DEB_ARCH=amd64 ./tools/build-deb.sh
 产物分别写入 `dist/arm64/` 和 `dist/amd64/`，并生成 `.sha256` 文件。脚本会读取构建机和 `.deb` 的真实架构；不允许通过修改 CPack 标签把 x86_64 二进制伪装成 ARM64 包。
 
 从干净仓库构建 Docker 依赖镜像、生成两个包和执行麒麟验收的完整步骤见 [MVP双架构DEB构建指南.md](../MVP双架构DEB构建指南.md)。
+ARM64 的构建机前置条件、制品校验和麒麟安装验收见 [ARM64麒麟构建与验收任务.md](../ARM64麒麟构建与验收任务.md)。
 
 Qt/QML 插件不会被 `dpkg-shlibdeps` 全部发现。Qt 5 测试通道已经提供 Ubuntu/Kylin 常见包名作为默认值；T0A 锁定实际镜像后，通过 `STAR_KYLIN_DEBIAN_RUNTIME_DEPENDS` 覆盖为验收环境的准确依赖，不能直接照搬未验证包名。
 
