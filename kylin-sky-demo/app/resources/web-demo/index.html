@@ -2,12 +2,76 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <title>麒麟工作台 Web 容器验证页</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>外汇业务演示台</title>
+  <style>
+    :root { color-scheme: dark; font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; color: #d8ebf7; background: #071b30; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { padding: 14px; background: #071b30; font-size: 15px; }
+    .shell { display: grid; grid-template-rows: 42px minmax(0, 1fr); height: 100%; border: 1px solid #28516e; background: #09233d; }
+    .bar { display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid #28516e; background: #0a3153; }
+    .bar strong { color: #ffffff; font-family: "Noto Sans Mono", monospace; font-size: 15px; letter-spacing: .04em; }
+    .bar span { color: #80dce5; font-size: 12px; }
+    .bar span::before { display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: #25d3e2; box-shadow: 0 0 8px #25d3e2; content: ""; }
+    .workspace { display: grid; grid-template-columns: minmax(420px, 1.45fr) minmax(255px, .7fr); min-height: 0; }
+    .main { min-height: 0; padding: 16px; border-right: 1px solid #28516e; }
+    h1, h2, p { margin: 0; }
+    h1 { color: #fff; font-size: 25px; }
+    .eyebrow { margin-bottom: 4px; color: #80dce5; font-family: "Noto Sans Mono", monospace; font-size: 12px; letter-spacing: .06em; }
+    .sub { margin-top: 5px; color: #a6c5d8; font-size: 13px; }
+    .quote-head { display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 14px; border-bottom: 1px solid #264962; }
+    .quote-head strong { color: #fff; font-family: "Noto Sans Mono", monospace; font-size: 28px; }
+    .quote-head b { margin-left: 8px; color: #91e2d0; font-family: "Noto Sans Mono", monospace; font-size: 14px; }
+    .chart { position: relative; height: 39%; min-height: 155px; margin-top: 14px; border: 1px solid #28516e; background: #082843; overflow: hidden; }
+    .chart svg { display: block; width: 100%; height: 100%; }
+    .chart-label { position: absolute; right: 11px; bottom: 9px; color: #85a7bc; font-family: "Noto Sans Mono", monospace; font-size: 12px; }
+    .quote-table { margin-top: 13px; border: 1px solid #28516e; }
+    .quote-row { display: grid; grid-template-columns: 1.25fr 1fr 1fr .55fr; min-height: 43px; border-bottom: 1px solid #21445f; align-items: center; padding: 0 12px; }
+    .quote-row:last-child { border-bottom: 0; }
+    .quote-row.head { min-height: 34px; color: #8eacc0; background: #0a3153; font-size: 12px; }
+    .quote-row b { color: #ffffff; font-family: "Noto Sans Mono", monospace; font-size: 14px; }
+    .quote-row .bid { color: #91e2d0; } .quote-row .ask { color: #f0abb7; } .quote-row .up { color: #91e2d0; }
+    .ticket { padding: 16px; background: #0b2740; }
+    .ticket h2 { color: #fff; font-size: 19px; }
+    .ticket p { margin-top: 7px; color: #a6c5d8; font-size: 13px; line-height: 1.45; }
+    .fields { margin-top: 16px; border-top: 1px solid #28516e; }
+    .field { display: grid; grid-template-columns: 82px 1fr; gap: 10px; min-height: 38px; align-items: center; border-bottom: 1px solid #21445f; }
+    .field span { color: #8eacc0; font-size: 12px; } .field b { color: #e6f4fc; font-family: "Noto Sans Mono", monospace; font-size: 13px; text-align: right; }
+    button { width: 100%; height: 34px; margin-top: 18px; color: #7899ae; border: 1px solid #315975; background: #0a3153; font: inherit; cursor: not-allowed; }
+    .note { margin-top: 12px; color: #7597ad; font-size: 12px; line-height: 1.5; }
+  </style>
 </head>
 <body>
-  <main>
-    <h1>本地 Web 容器验证页</h1>
-    <p>该页面仅用于后续加载、刷新、错误与来源拦截验收。</p>
+  <main class="shell" aria-label="外汇业务演示台">
+    <header class="bar"><strong>外汇业务工作台</strong><span>报价流正常 / 本地演示</span></header>
+    <div class="workspace">
+      <section class="main">
+        <div class="quote-head">
+          <div><p class="eyebrow">即期走势</p><h1>美元 / 人民币</h1><p class="sub">受控内嵌业务演示，不连接真实账户或交易服务。</p></div>
+          <div><strong>7.1842</strong><b>+0.08%</b></div>
+        </div>
+        <div class="chart" aria-label="USD CNY 即期走势示意">
+          <svg viewBox="0 0 720 260" preserveAspectRatio="none" role="img">
+            <g stroke="#1e4c69" stroke-width="1"><path d="M0 38H720M0 90H720M0 142H720M0 194H720M0 246H720"/><path d="M90 0V260M210 0V260M330 0V260M450 0V260M570 0V260M690 0V260"/></g>
+            <path d="M0 177 C50 150 77 184 132 142 S228 164 286 115 S374 137 430 92 S506 116 561 65 S653 90 720 43 L720 260 L0 260Z" fill="#17b2c7" opacity=".22"/>
+            <path d="M0 177 C50 150 77 184 132 142 S228 164 286 115 S374 137 430 92 S506 116 561 65 S653 90 720 43" fill="none" stroke="#38dfdf" stroke-width="3"/>
+          </svg>
+          <span class="chart-label">09:30 ─ 15:00</span>
+        </div>
+        <div class="quote-table">
+          <div class="quote-row head"><span>货币对</span><span>买入价</span><span>卖出价</span><span>涨跌</span></div>
+          <div class="quote-row"><b>美元 / 人民币</b><b class="bid">7.1842</b><b class="ask">7.1860</b><b class="up">+0.08%</b></div>
+          <div class="quote-row"><b>欧元 / 人民币</b><b class="bid">7.8215</b><b class="ask">7.8242</b><b>-0.11%</b></div>
+          <div class="quote-row"><b>日元 / 人民币</b><b class="bid">0.04618</b><b class="ask">0.04626</b><b class="up">+0.03%</b></div>
+        </div>
+      </section>
+      <aside class="ticket">
+        <p class="eyebrow">结售汇摘要</p><h2>业务请求概览</h2><p>该区域仅表现受控业务系统的嵌入结构和字段密度。</p>
+        <div class="fields"><div class="field"><span>币种</span><b>美元 / 人民币</b></div><div class="field"><span>方向</span><b>买入美元</b></div><div class="field"><span>金额</span><b>100,000.00 USD</b></div><div class="field"><span>状态</span><b>待业务确认</b></div></div>
+        <button disabled>交易操作未开放</button><p class="note">本地演示页没有账户、下单、资金或交易能力。真实业务系统仍须独立认证、鉴权和审计。</p>
+      </aside>
+    </div>
   </main>
 </body>
 </html>

@@ -7,6 +7,7 @@
 
 #include <QObject>
 #include <QUrl>
+#include <QVariantList>
 
 class AppController final : public QObject {
     Q_OBJECT
@@ -42,6 +43,8 @@ public:
     Q_INVOKABLE bool activateTab(const QString &id);
     Q_INVOKABLE bool closeTab(const QString &id);
     Q_INVOKABLE QUrl moduleEntryUrl(const QString &id) const;
+    Q_INVOKABLE QUrl moduleEntryUrlForPage(const QString &id, const QString &pageId) const;
+    Q_INVOKABLE QVariantList approvedPages(const QString &id) const;
     Q_INVOKABLE bool isWebModule(const QString &id) const;
     Q_INVOKABLE QString launchNativeModule(const QString &id) const;
 
@@ -53,6 +56,7 @@ signals:
     void activeModuleIdChanged();
 
 private:
+    const ModuleDefinition *allowedModule(const QString &id) const;
     void setLoginError(const QString &error);
     void setLoginPending(bool pending);
     void establishSession(const UserDefinition &user);

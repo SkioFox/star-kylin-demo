@@ -17,6 +17,10 @@
 #include <QtWebEngine/QtWebEngine>
 #endif
 
+#ifndef KYLIN_SKY_APPLICATION_VERSION
+#define KYLIN_SKY_APPLICATION_VERSION "0.2.1"
+#endif
+
 int main(int argc, char *argv[])
 {
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
@@ -32,7 +36,7 @@ int main(int argc, char *argv[])
     QtWebEngine::initialize();
 #endif
     QCoreApplication::setApplicationName(QStringLiteral("kylin-sky-demo"));
-    QCoreApplication::setApplicationVersion(QStringLiteral("0.1.0"));
+    QCoreApplication::setApplicationVersion(QStringLiteral(KYLIN_SKY_APPLICATION_VERSION));
     QCoreApplication::setOrganizationName(QStringLiteral("Kylin Sky Demo"));
     qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/qml/Theme.qml")), "KylinSky", 1, 0,
                              "Theme");
@@ -47,6 +51,8 @@ int main(int argc, char *argv[])
     AppController controller(std::move(manifest), std::move(configurationError));
     MarketDataService marketData;
     engine.rootContext()->setContextProperty(QStringLiteral("appController"), &controller);
+    engine.rootContext()->setContextProperty(QStringLiteral("applicationVersion"),
+                                             QCoreApplication::applicationVersion());
     engine.rootContext()->setContextProperty(QStringLiteral("marketData"), &marketData);
     engine.rootContext()->setContextProperty(QStringLiteral("webProfiles"), &webProfiles);
     QObject::connect(&controller, &AppController::authenticatedChanged, &webProfiles, [&controller, &webProfiles] { if (!controller.authenticated()) webProfiles.clearSessions(); });

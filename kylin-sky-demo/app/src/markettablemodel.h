@@ -26,7 +26,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
     void setInstruments(QList<MarketInstrument> instruments);
     void updateInstrument(int row, double price, double change);
-    Q_INVOKABLE QVariantMap firstForMarket(const QString &market) const;
+    Q_INVOKABLE QVariantMap firstForMarket(const QString &market, const QString &preferredId = QString()) const;
 private:
     QList<MarketInstrument> m_instruments;
 };

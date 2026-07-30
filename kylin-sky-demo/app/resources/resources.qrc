@@ -5,10 +5,16 @@
     <file alias="LoginPage.qml">../qml/LoginPage.qml</file>
     <file alias="AppShell.qml">../qml/AppShell.qml</file>
     <file alias="MarketWorkspace.qml">../qml/MarketWorkspace.qml</file>
+    <file alias="TrendCanvas.qml">../qml/TrendCanvas.qml</file>
+    <file alias="MarketOverviewWorkspace.qml">../qml/MarketOverviewWorkspace.qml</file>
+    <file alias="GlobalWorkspace.qml">../qml/GlobalWorkspace.qml</file>
+    <file alias="FuturesWorkspace.qml">../qml/FuturesWorkspace.qml</file>
+    <file alias="GoldWorkspace.qml">../qml/GoldWorkspace.qml</file>
     <file alias="KlinePanel.qml">../qml/KlinePanel.qml</file>
     <file alias="WebModulePage.qml">../qml/WebModulePage.qml</file>
     <file alias="ServicePage.qml">../qml/ServicePage.qml</file>
     <file alias="ResearchWorkspace.qml">../qml/ResearchWorkspace.qml</file>
+    <file alias="NativeMarketWorkspace.qml">../qml/NativeMarketWorkspace.qml</file>
     <file alias="ConfigErrorPage.qml">../qml/ConfigErrorPage.qml</file>
   </qresource>
   <qresource prefix="/config">

@@ -47,7 +47,20 @@ int main(int argc, char *argv[])
       "roles":{"主管":["native"]},
       "modules":[{"id":"native","type":"native","name":"工具","description":"固定路径","group":"应用服务","program":"/usr/bin/tool","args":["1","2","3","4","5","6"]}]
     })json";
-    return parseSucceeds(valid) && parseFailsWith(unapproved, QStringLiteral("精确授权"))
+    const QByteArray multiPage = R"json({
+      "schemaVersion":1,
+      "users":{"operator":{"password":"demo","displayName":"运营主管","role":"主管"}},
+      "roles":{"主管":["external"]},
+      "modules":[{"id":"external","type":"web","name":"在线网页","description":"批准来源","group":"应用服务","entryUrl":"https://www.baidu.com/","allowedLocalPrefixes":[],"allowedNavigationOrigins":["https://www.baidu.com","https://www.bilibili.com"],"allowedResourceOrigins":["https://www.baidu.com","https://www.bilibili.com"],"approvedPages":[{"id":"baidu","name":"百度","entryUrl":"https://www.baidu.com/","allowedNavigationOrigins":["https://www.baidu.com"],"allowedResourceOrigins":["https://www.baidu.com"]},{"id":"bilibili","name":"哔哩哔哩","entryUrl":"https://www.bilibili.com/","allowedNavigationOrigins":["https://www.bilibili.com"],"allowedResourceOrigins":["https://www.bilibili.com"]}]}]
+    })json";
+    const QByteArray multiPageEscalation = R"json({
+      "schemaVersion":1,
+      "users":{"operator":{"password":"demo","displayName":"运营主管","role":"主管"}},
+      "roles":{"主管":["external"]},
+      "modules":[{"id":"external","type":"web","name":"在线网页","description":"批准来源","group":"应用服务","entryUrl":"https://www.baidu.com/","allowedLocalPrefixes":[],"allowedNavigationOrigins":["https://www.baidu.com"],"allowedResourceOrigins":["https://www.baidu.com"],"approvedPages":[{"id":"bilibili","name":"哔哩哔哩","entryUrl":"https://www.bilibili.com/","allowedNavigationOrigins":["https://www.bilibili.com"],"allowedResourceOrigins":["https://www.bilibili.com"]}]}]
+    })json";
+    return parseSucceeds(valid) && parseSucceeds(multiPage) && parseFailsWith(unapproved, QStringLiteral("精确授权"))
+               && parseFailsWith(multiPageEscalation, QStringLiteral("未在模块范围内授权"))
                && parseFailsWith(overflow, QStringLiteral("原生启动配置"))
            ? 0
            : 1;

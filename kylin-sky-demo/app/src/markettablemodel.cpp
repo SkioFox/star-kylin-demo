@@ -31,11 +31,19 @@ void MarketTableModel::updateInstrument(int row, double price, double change)
     m_instruments[row].change = change;
     emit dataChanged(index(row), index(row), {PriceRole, ChangeRole, DirectionRole});
 }
-QVariantMap MarketTableModel::firstForMarket(const QString &market) const
+QVariantMap MarketTableModel::firstForMarket(const QString &market, const QString &preferredId) const
 {
+    if (!preferredId.isEmpty()) {
+        for (const MarketInstrument &item : m_instruments)
+            if (item.market == market && item.id == preferredId)
+                return {{QStringLiteral("instrumentId"), item.id}, {QStringLiteral("code"), item.code}, {QStringLiteral("name"), item.name},
+                        {QStringLiteral("category"), item.category}, {QStringLiteral("status"), item.status},
+                        {QStringLiteral("price"), item.price}, {QStringLiteral("change"), item.change},
+                        {QStringLiteral("amount"), item.amount}};
+    }
     for (const MarketInstrument &item : m_instruments) {
         if (item.market != market) continue;
-        return {{QStringLiteral("code"), item.code}, {QStringLiteral("name"), item.name},
+        return {{QStringLiteral("instrumentId"), item.id}, {QStringLiteral("code"), item.code}, {QStringLiteral("name"), item.name},
                 {QStringLiteral("category"), item.category}, {QStringLiteral("status"), item.status},
                 {QStringLiteral("price"), item.price}, {QStringLiteral("change"), item.change},
                 {QStringLiteral("amount"), item.amount}};

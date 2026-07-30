@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication application(argc, argv);
     MarketDataService service;
-    if (!service.ready() || !service.error().isEmpty() || service.model()->rowCount() != 10) {
+    if (!service.ready() || !service.error().isEmpty() || service.model()->rowCount() != 25) {
         qCritical().noquote() << "market model invalid:" << service.error();
         return 1;
     }
@@ -21,8 +21,20 @@ int main(int argc, char *argv[])
         qCritical() << "market model first row invalid";
         return 1;
     }
+    const QVariantMap gold = service.model()->firstForMarket(QStringLiteral("黄金"));
+    if (gold.value(QStringLiteral("instrumentId")).toString() != QStringLiteral("gold-bank-boc")
+        || gold.value(QStringLiteral("code")).toString() != QStringLiteral("BOC-AU")) {
+        qCritical() << "gold default instrument invalid";
+        return 1;
+    }
+    const QVariantMap research = service.model()->firstForMarket(QStringLiteral("国内"), QStringLiteral("pingan"));
+    if (research.value(QStringLiteral("instrumentId")).toString() != QStringLiteral("pingan")
+        || research.value(QStringLiteral("code")).toString() != QStringLiteral("000001")) {
+        qCritical() << "research default instrument invalid";
+        return 1;
+    }
     service.reload();
-    if (!service.ready() || service.model()->rowCount() != 10) {
+    if (!service.ready() || service.model()->rowCount() != 25) {
         qCritical() << "market model did not recover after reload";
         return 1;
     }

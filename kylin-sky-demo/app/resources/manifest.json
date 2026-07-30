@@ -13,7 +13,7 @@
     }
   },
   "roles": {
-    "运营主管": ["watchlist", "research", "market", "global", "futures", "gold", "web", "external", "network", "native-market"],
+    "运营主管": ["watchlist", "research", "market", "global", "futures", "gold", "web", "external", "network", "native-market", "native-integration", "native-calculator", "native-browser"],
     "审阅人员": ["watchlist", "research", "market", "global", "futures", "gold", "web", "network"]
   },
   "modules": [
@@ -31,12 +31,28 @@
     {
       "id":"external","type":"web","name":"在线网页","description":"已批准的外部页面","group":"应用服务",
       "entryUrl":"https://www.baidu.com/","allowedLocalPrefixes":[],
-      "allowedNavigationOrigins":["https://www.baidu.com"],"allowedResourceOrigins":["https://www.baidu.com"]
+      "allowedNavigationOrigins":["https://www.baidu.com", "https://www.bilibili.com"],"allowedResourceOrigins":["https://www.baidu.com", "https://www.bilibili.com"],
+      "approvedPages":[
+        {"id":"baidu","name":"百度","entryUrl":"https://www.baidu.com/","allowedNavigationOrigins":["https://www.baidu.com"],"allowedResourceOrigins":["https://www.baidu.com"]},
+        {"id":"bilibili","name":"哔哩哔哩","entryUrl":"https://www.bilibili.com/","allowedNavigationOrigins":["https://www.bilibili.com"],"allowedResourceOrigins":["https://www.bilibili.com"]}
+      ]
     },
     {"id":"network","type":"network","name":"网络验证","description":"HTTP、HTTPS、SSE 与 WebSocket 状态","group":"应用服务"},
     {
-      "id":"native-market","type":"native","name":"原生行情中心","description":"启动已批准的本机工具","group":"应用服务",
+      "id":"native-market","type":"native","name":"原生行情中心","description":"Qt 原生图表与本机工具","group":"原生能力",
       "program":"/usr/bin/ukui-control-center","args":[]
+    },
+    {
+      "id":"native-integration","type":"native","name":"本机应用集成","description":"从固定清单启动系统应用","group":"原生能力",
+      "program":"/usr/bin/mate-terminal","args":[]
+    },
+    {
+      "id":"native-calculator","type":"native","name":"计算器","description":"从固定清单启动麒麟计算器","group":"原生能力",
+      "showInNavigation":false,"program":"/usr/bin/kylin-calculator","args":[]
+    },
+    {
+      "id":"native-browser","type":"native","name":"系统浏览器","description":"从固定清单启动系统浏览器","group":"原生能力",
+      "showInNavigation":false,"program":"/usr/bin/qaxbrowser-safe-stable","args":[]
     }
   ]
 }

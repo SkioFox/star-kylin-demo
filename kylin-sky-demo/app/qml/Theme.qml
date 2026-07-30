@@ -1,20 +1,50 @@
 pragma Singleton
 import QtQuick 2.12
+
 QtObject {
     readonly property string uiFont: "Noto Sans CJK SC"
     readonly property string dataFont: "Noto Sans Mono"
-    readonly property color nav: "#061B33"
-    readonly property color navElevated: "#0A2947"
-    readonly property color navActive: "#0D4F85"
-    readonly property color primary: "#0D72B9"
-    readonly property color signal: "#00A6C7"
-    readonly property color canvas: "#F4F8FC"
-    readonly property color surface: "#FFFFFF"
-    readonly property color ink: "#17324D"
-    readonly property color muted: "#60748A"
-    readonly property color line: "#CCD9E6"
-    readonly property color softLine: "#E6EEF5"
-    readonly property color gold: "#D7A84B"
-    readonly property color up: "#C13D48"
-    readonly property color down: "#26805B"
+    readonly property real textScale: 1.28
+
+    // Sampled from the V2.1 prototype's terminal surfaces and signal states.
+    readonly property color command: "#061426"
+    readonly property color rail: "#072038"
+    readonly property color railHover: "#071D34"
+    readonly property color railActive: "#0A4773"
+    readonly property color panelBlue: "#0A3050"
+    readonly property color panelBlueDark: "#082A44"
+    readonly property color signal: "#33D8E4"
+    readonly property color signalSoft: "#0C3D60"
+    readonly property color gold: "#E3B65B"
+    readonly property color label: "#67DFE6"
+    readonly property color labelMuted: "#C6D9E8"
+    readonly property color accentText: label
+
+    readonly property color canvas: "#071C31"
+    readonly property color surface: "#092D4A"
+    readonly property color surfaceSoft: "#071D34"
+    readonly property color ink: "#F1F7FC"
+    readonly property color muted: "#A6C5D8"
+    readonly property color line: "#0A4773"
+    readonly property color softLine: "#0C3150"
+    readonly property color up: "#DF637B"
+    readonly property color down: "#56D4B0"
+
+    // Authentication intentionally keeps the bright, low-distraction form surface from V2.1.
+    readonly property color loginSurface: "#FFFFFF"
+    readonly property color loginInk: "#172B42"
+    readonly property color loginMuted: "#5C6F84"
+    readonly property color loginLine: "#BCCDDE"
+    readonly property color loginAction: "#0A67B4"
+
+    readonly property int shellRailHeight: 60
+    readonly property int tabsHeight: 46
+    readonly property int contextHeight: 40
+    readonly property int sidebarWidth: 224
+    readonly property int contentPadding: 16
+    readonly property int controlHeight: 34
+    readonly property int navigationRowHeight: 44
+    readonly property int denseRowHeight: 36
+    readonly property int dataRowHeight: 56
+    readonly property int toolHeight: 36
 }

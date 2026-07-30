@@ -7,6 +7,7 @@ class AppControllerTest final : public QObject {
 private slots:
     void rejectsInvalidCredentials();
     void filtersModulesAndMaintainsSingleTabs();
+    void exposesApprovedPagesFromTheManifest();
     void logoutClearsTheSession();
 
 private:
@@ -56,6 +57,7 @@ void AppControllerTest::logoutClearsTheSession()
     AppController controller(manifest(), {});
     controller.login(QStringLiteral("operator"), QStringLiteral("KylinDemo2026"));
     QTRY_VERIFY(controller.authenticated());
+    QCOMPARE(controller.moduleModel()->rowCount(), 11);
     QVERIFY(controller.openModule(QStringLiteral("external")));
 
     controller.logout();
@@ -64,6 +66,19 @@ void AppControllerTest::logoutClearsTheSession()
     QCOMPARE(controller.tabModel()->rowCount(), 1);
     QCOMPARE(controller.activeModuleId(), QStringLiteral("workbench"));
     QVERIFY(!controller.activateTab(QStringLiteral("external")));
+}
+
+void AppControllerTest::exposesApprovedPagesFromTheManifest()
+{
+    AppController controller(manifest(), {});
+    controller.login(QStringLiteral("operator"), QStringLiteral("KylinDemo2026"));
+    QTRY_VERIFY(controller.authenticated());
+    const QVariantList pages = controller.approvedPages(QStringLiteral("external"));
+    QCOMPARE(pages.size(), 2);
+    QCOMPARE(pages.at(0).toMap().value(QStringLiteral("id")).toString(), QStringLiteral("baidu"));
+    QCOMPARE(controller.moduleEntryUrlForPage(QStringLiteral("external"), QStringLiteral("bilibili")),
+             QUrl(QStringLiteral("https://www.bilibili.com/")));
+    QVERIFY(controller.moduleEntryUrlForPage(QStringLiteral("external"), QStringLiteral("unlisted")).isEmpty());
 }
 
 QTEST_MAIN(AppControllerTest)

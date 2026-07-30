@@ -5,12 +5,15 @@ import KylinSky 1.0
 
 ApplicationWindow {
     visible: true
+    visibility: Window.Maximized
     width: 1280
     height: 800
-    minimumWidth: 960
-    minimumHeight: 600
-    title: qsTr("麒麟工作台 v0.1.0")
+    minimumWidth: 1180
+    minimumHeight: 680
+    title: qsTr("麒麟工作台 v%1").arg(applicationVersion)
     color: Theme.canvas
+    font.family: Theme.uiFont
+    font.pixelSize: Math.round(13 * Theme.textScale)
 
     Loader {
         anchors.fill: parent

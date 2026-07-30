@@ -16,20 +16,35 @@ WebProfileManager::WebProfileManager(const ManifestData &manifest, QObject *pare
 {
     for (const ModuleDefinition &module : manifest.modules) {
         if (module.type != QStringLiteral("web")) continue;
-        auto *profile = new QQuickWebEngineProfile(this);
-        profile->setOffTheRecord(true);
-        profile->setHttpCacheType(QQuickWebEngineProfile::MemoryHttpCache);
-        profile->setPersistentCookiesPolicy(QQuickWebEngineProfile::NoPersistentCookies);
-        profile->setSpellCheckEnabled(false);
-        auto *interceptor = new Interceptor(&m_policy, module.id, profile);
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-        profile->setRequestInterceptor(interceptor);
-#else
-        profile->setUrlRequestInterceptor(interceptor);
-#endif
-        m_profiles.insert(module.id, profile);
+        m_profiles.insert(module.id, createProfile(module.id));
+        for (const ApprovedPageDefinition &page : module.approvedPages)
+            m_profiles.insert(module.id + QLatin1Char('#') + page.id,
+                             createProfile(module.id + QLatin1Char('#') + page.id));
     }
 }
+QQuickWebEngineProfile *WebProfileManager::createProfile(const QString &policyId)
+{
+    auto *profile = new QQuickWebEngineProfile(this);
+    profile->setOffTheRecord(true);
+    profile->setHttpCacheType(QQuickWebEngineProfile::MemoryHttpCache);
+    profile->setPersistentCookiesPolicy(QQuickWebEngineProfile::NoPersistentCookies);
+    profile->setSpellCheckEnabled(false);
+    auto *interceptor = new Interceptor(&m_policy, policyId, profile);
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    profile->setRequestInterceptor(interceptor);
+#else
+    profile->setUrlRequestInterceptor(interceptor);
+#endif
+    return profile;
+}
 QQuickWebEngineProfile *WebProfileManager::profile(const QString &moduleId) const { return m_profiles.value(moduleId); }
+QQuickWebEngineProfile *WebProfileManager::profileForPage(const QString &moduleId, const QString &pageId) const
+{
+    return m_profiles.value(moduleId + QLatin1Char('#') + pageId, m_profiles.value(moduleId));
+}
 bool WebProfileManager::navigationAllowed(const QString &moduleId, const QUrl &url) const { return m_policy.navigationAllowed(moduleId, url); }
+bool WebProfileManager::navigationAllowedForPage(const QString &moduleId, const QString &pageId, const QUrl &url) const
+{
+    return m_policy.navigationAllowed(moduleId + QLatin1Char('#') + pageId, url);
+}
 void WebProfileManager::clearSessions() { for (auto *profile : m_profiles) { profile->cookieStore()->deleteAllCookies(); profile->clearHttpCache(); } }

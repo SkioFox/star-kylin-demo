@@ -76,8 +76,38 @@ bool AppController::openModule(const QString &id)
 bool AppController::activateTab(const QString &id) { return m_authenticated && m_tabModel.activate(id); }
 bool AppController::closeTab(const QString &id) { return m_authenticated && m_tabModel.close(id); }
 QUrl AppController::moduleEntryUrl(const QString &id) const { const ModuleDefinition *module = m_authenticated ? m_moduleModel.find(id) : nullptr; return module && module->type == QStringLiteral("web") ? QUrl(module->entryUrl, QUrl::StrictMode) : QUrl(); }
+QUrl AppController::moduleEntryUrlForPage(const QString &id, const QString &pageId) const
+{
+    const ModuleDefinition *module = m_authenticated ? m_moduleModel.find(id) : nullptr;
+    if (!module || module->type != QStringLiteral("web")) return {};
+    for (const ApprovedPageDefinition &page : module->approvedPages)
+        if (page.id == pageId) return QUrl(page.entryUrl, QUrl::StrictMode);
+    return {};
+}
+QVariantList AppController::approvedPages(const QString &id) const
+{
+    QVariantList result;
+    const ModuleDefinition *module = m_authenticated ? m_moduleModel.find(id) : nullptr;
+    if (!module || module->type != QStringLiteral("web")) return result;
+    for (const ApprovedPageDefinition &page : module->approvedPages) {
+        QVariantMap value;
+        value.insert(QStringLiteral("id"), page.id);
+        value.insert(QStringLiteral("name"), page.name);
+        value.insert(QStringLiteral("entryUrl"), page.entryUrl);
+        result.append(value);
+    }
+    return result;
+}
 bool AppController::isWebModule(const QString &id) const { const ModuleDefinition *module = m_moduleModel.find(id); return m_authenticated && module && module->type == QStringLiteral("web"); }
-QString AppController::launchNativeModule(const QString &id) const { const ModuleDefinition *module = m_authenticated ? m_moduleModel.find(id) : nullptr; return module ? NativeLauncher::launch(*module) : QStringLiteral("未授权或不存在的本机应用。"); }
+QString AppController::launchNativeModule(const QString &id) const { const ModuleDefinition *module = allowedModule(id); return module ? NativeLauncher::launch(*module) : QStringLiteral("未授权或不存在的本机应用。"); }
+
+const ModuleDefinition *AppController::allowedModule(const QString &id) const
+{
+    if (!m_authenticated || !m_manifest.roles.value(m_currentUser.role).contains(id)) return nullptr;
+    for (const ModuleDefinition &module : m_manifest.modules)
+        if (module.id == id) return &module;
+    return nullptr;
+}
 
 void AppController::setLoginError(const QString &error)
 {
@@ -98,7 +128,7 @@ void AppController::establishSession(const UserDefinition &user)
     QList<ModuleDefinition> modules;
     const QStringList allowed = m_manifest.roles.value(user.role);
     for (const ModuleDefinition &module : m_manifest.modules)
-        if (allowed.contains(module.id)) modules.append(module);
+        if (allowed.contains(module.id) && module.showInNavigation) modules.append(module);
     m_currentUser = user;
     m_moduleModel.setModules(modules);
     m_tabModel.reset();

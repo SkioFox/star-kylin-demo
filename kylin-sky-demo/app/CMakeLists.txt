@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(kylin-sky-demo VERSION 0.1.0 LANGUAGES CXX)
+project(kylin-sky-demo VERSION 0.2.1 LANGUAGES CXX)
 
 include(CTest)
+
+set(KYLIN_SKY_PACKAGE_RELEASE "1" CACHE STRING "Debian package release")
+set(KYLIN_SKY_APPLICATION_VERSION "${PROJECT_VERSION}-${KYLIN_SKY_PACKAGE_RELEASE}")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -62,6 +65,7 @@ target_link_libraries(kylin-sky-demo PRIVATE
   ${KYLIN_SKY_WEBENGINE_TARGET}
 )
 target_compile_definitions(kylin-sky-demo PRIVATE QT_NO_CAST_FROM_ASCII QT_NO_CAST_TO_ASCII)
+target_compile_definitions(kylin-sky-demo PRIVATE KYLIN_SKY_APPLICATION_VERSION="${KYLIN_SKY_APPLICATION_VERSION}")
 
 if(QT_VERSION_MAJOR EQUAL 6)
   qt_finalize_executable(kylin-sky-demo)
@@ -72,7 +76,9 @@ if(BUILD_TESTING)
 endif()
 
 install(TARGETS kylin-sky-demo RUNTIME DESTINATION opt/kylin-sky-demo/bin)
-install(FILES packaging/kylin-sky-demo.desktop DESTINATION usr/share/applications)
+configure_file(packaging/kylin-sky-demo.desktop.in
+  "${CMAKE_CURRENT_BINARY_DIR}/kylin-sky-demo.desktop" @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/kylin-sky-demo.desktop" DESTINATION usr/share/applications)
 install(FILES packaging/kylin-sky-demo.svg DESTINATION usr/share/icons/hicolor/scalable/apps)
 install(FILES THIRD_PARTY_NOTICES.md DESTINATION usr/share/doc/kylin-sky-demo)
 
@@ -82,7 +88,6 @@ set(CPACK_PACKAGE_VENDOR "Kylin Sky Demo")
 set(CPACK_PACKAGE_CONTACT "Kylin Sky Demo Maintainers")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Kylin desktop banking workbench demo")
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
-set(KYLIN_SKY_PACKAGE_RELEASE "1" CACHE STRING "Debian package release")
 set(CPACK_DEBIAN_PACKAGE_RELEASE "${KYLIN_SKY_PACKAGE_RELEASE}")
 set(CPACK_PACKAGING_INSTALL_PREFIX /)
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)

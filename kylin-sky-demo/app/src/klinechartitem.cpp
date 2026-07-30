@@ -61,29 +61,73 @@ QList<Candle> aggregate(const QList<Candle> &source, int groupSize)
     }
     return result;
 }
+qreal baseFor(const QString &instrument)
+{
+    return instrument == QStringLiteral("au9999") ? 772.0
+           : instrument == QStringLiteral("gold-etf") ? 6.41
+           : instrument.startsWith(QStringLiteral("gold-bank-")) ? 772.0
+           : instrument == QStringLiteral("bank-index") ? 4310.0
+           : instrument == QStringLiteral("pingan") ? 11.48
+           : instrument == QStringLiteral("ningde") ? 188.6
+           : instrument == QStringLiteral("sse50") ? 2694.0
+           : instrument == QStringLiteral("star50") ? 1024.0
+           : instrument == QStringLiteral("sp500") ? 6124.0
+           : instrument == QStringLiteral("dow") ? 39315.0
+           : instrument == QStringLiteral("dax") ? 18731.0
+           : instrument == QStringLiteral("ftse") ? 8313.0
+           : instrument == QStringLiteral("nikkei") ? 39821.0
+           : instrument == QStringLiteral("hsi") ? 17862.0
+           : instrument == QStringLiteral("brent") ? 81.3
+           : instrument == QStringLiteral("crude") ? 606.8
+           : instrument == QStringLiteral("copper") ? 78640.0
+           : instrument == QStringLiteral("rebar") ? 3482.0
+           : instrument == QStringLiteral("soybeans") ? 4486.0
+           : instrument == QStringLiteral("if-main") ? 3820.0 : 3820.0;
+}
+qreal scaleFor(qreal base)
+{
+    if (base > 1000.0) return base * 0.0018;
+    if (base > 100.0) return base * 0.007;
+    if (base > 20.0) return base * 0.014;
+    return qMax<qreal>(0.04, base * 0.03);
+}
+QList<Candle> generatedSeries(const QString &instrument, QList<Candle> series)
+{
+    const uint seed = qHash(instrument);
+    const qreal base = baseFor(instrument);
+    const qreal scale = scaleFor(base);
+    const qreal phase = (seed % 29) * 0.11;
+    const qreal fast = 0.25 + (seed % 7) * 0.025;
+    const qreal slow = 0.08 + (seed % 5) * 0.018;
+    const int trendDirection = static_cast<int>((seed >> 3) % 5) - 2;
+    const qreal trend = trendDirection * scale * 0.006;
+    qreal previous = series.isEmpty() ? base : series.constLast().close;
+    const int start = series.size();
+    for (int i = start; i < 96; ++i) {
+        const qreal open = previous;
+        const qreal drift = qSin((i + 1) * fast + phase) * scale
+                            + qCos((i + 1) * slow + phase * 1.7) * scale * 0.52
+                            + trend * (i - start);
+        const qreal close = qMax<qreal>(0.01, open + drift);
+        const qreal wick = scale * (0.28 + ((i + seed) % 5) * 0.09);
+        const qreal volume = 28.0 + ((i * 19 + seed) % 96);
+        const qreal macd = qSin((i + 1) * (fast * 0.8) + phase) * 1.1
+                           + qCos((i + 1) * 0.12 + phase) * 0.42;
+        series.append({open, close, qMax(open, close) + wick, qMax<qreal>(0.01, qMin(open, close) - wick), volume, macd});
+        previous = close;
+    }
+    return series;
+}
 QList<Candle> seriesFor(const QString &instrument, const QString &period)
 {
     const QList<Candle> fixture = fixtureSeries(instrument);
     if (!fixture.isEmpty()) {
-        if (period == QStringLiteral("周 K")) return aggregate(fixture, 5);
-        if (period == QStringLiteral("月 K")) return aggregate(fixture, 15);
-        return fixture;
+        const QList<Candle> expanded = generatedSeries(instrument, fixture);
+        if (period == QStringLiteral("周 K")) return aggregate(expanded, 5);
+        if (period == QStringLiteral("月 K")) return aggregate(expanded, 15);
+        return expanded;
     }
-    QList<Candle> series;
-    const qreal base = instrument == QStringLiteral("au9999") ? 772.0
-                      : instrument == QStringLiteral("bank-index") ? 4310.0 : 3820.0;
-    const qreal scale = base > 1000.0 ? base * 0.002 : 1.8;
-    qreal previous = base;
-    for (int i = 0; i < 90; ++i) {
-        const qreal drift = qSin(i * 0.41) * scale + qCos(i * 0.13) * scale * 0.58;
-        const qreal open = previous;
-        const qreal close = open + drift;
-        series.append({open, close, qMax(open, close) + scale * (0.45 + (i % 3) * .13),
-                       qMin(open, close) - scale * (0.38 + (i % 4) * .08),
-                       32.0 + (i * 17 % 80), qSin(i * .27) * 1.2 + qCos(i * .09) * .45});
-        previous = close;
-    }
-    return series;
+    return generatedSeries(instrument, {});
 }
 void rect(QSGNode *root, qreal x, qreal y, qreal width, qreal height, const QColor &color)
 {
@@ -121,7 +165,7 @@ QSGNode *KlineChartItem::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *
     root->removeAllChildNodes();
     const qreal w = width(), h = height();
     if (w < 40 || h < 80) return root;
-    const QColor grid("#E4EBF2"), up("#C13D48"), down("#26805B"), ma("#286AB2"), macd("#B98332");
+    const QColor grid("#0A4773"), up("#DF637B"), down("#56D4B0"), ma("#33D8E4"), macd("#E3B65B");
     for (int row = 0; row < 6; ++row) rect(root, 0, row * h * .62 / 5.0, w, 1, grid);
     for (int col = 0; col < 7; ++col) rect(root, col * w / 6.0, 0, 1, h, grid);
     const QList<Candle> values = seriesFor(m_instrumentId, m_period);

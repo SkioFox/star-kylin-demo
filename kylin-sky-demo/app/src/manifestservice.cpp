@@ -51,6 +51,16 @@ bool stringArray(const QJsonObject &object, const QString &key, const QString &c
     return true;
 }
 
+bool optionalBool(const QJsonObject &object, const QString &key, const QString &context,
+                  bool *output, QString *error)
+{
+    if (!object.contains(key)) return true;
+    const QJsonValue value = object.value(key);
+    if (!value.isBool()) return fail(error, context + QStringLiteral(" 的 ") + key + QStringLiteral(" 必须是布尔值"));
+    *output = value.toBool();
+    return true;
+}
+
 bool safeQrc(const QString &value)
 {
     const QUrl url(value, QUrl::StrictMode);
@@ -83,6 +93,29 @@ bool validOrigins(const QStringList &origins, const QString &context, QString *e
             || url.hasQuery() || url.hasFragment() || origin.contains(QLatin1Char('*')))
             return fail(error, context + QStringLiteral(" 包含非法 HTTPS Origin：") + origin);
     }
+    return true;
+}
+
+bool parseApprovedPage(const QJsonObject &object, const QString &context,
+                       ApprovedPageDefinition *page, QString *error)
+{
+    if (!page) return fail(error, context + QStringLiteral(" 输出对象不能为空"));
+    *page = {};
+    if (!onlyKeys(object, {QStringLiteral("id"), QStringLiteral("name"), QStringLiteral("entryUrl"),
+                           QStringLiteral("allowedNavigationOrigins"), QStringLiteral("allowedResourceOrigins")},
+                  context, error)
+        || !requiredString(object, QStringLiteral("id"), context, &page->id, error)
+        || !requiredString(object, QStringLiteral("name"), context, &page->name, error)
+        || !requiredString(object, QStringLiteral("entryUrl"), context, &page->entryUrl, error)
+        || !stringArray(object, QStringLiteral("allowedNavigationOrigins"), context,
+                        &page->allowedNavigationOrigins, error)
+        || !stringArray(object, QStringLiteral("allowedResourceOrigins"), context,
+                        &page->allowedResourceOrigins, error)
+        || !validOrigins(page->allowedNavigationOrigins, context, error)
+        || !validOrigins(page->allowedResourceOrigins, context, error)) return false;
+    const QString origin = httpsOrigin(page->entryUrl);
+    if (origin.isEmpty() || !page->allowedNavigationOrigins.contains(origin))
+        return fail(error, context + QStringLiteral(" 的 HTTPS 入口未被精确授权"));
     return true;
 }
 } // namespace
@@ -148,10 +181,11 @@ bool ManifestService::parse(const QByteArray &json, ManifestData *manifest, QStr
             || !requiredString(object, QStringLiteral("group"), context, &module.group, error)) return false;
         if (moduleIds.contains(module.id)) return fail(error, QStringLiteral("模块 ID 重复：") + module.id);
         moduleIds.insert(module.id);
-        const QSet<QString> common = {QStringLiteral("id"), QStringLiteral("type"), QStringLiteral("name"), QStringLiteral("description"), QStringLiteral("group")};
+        const QSet<QString> common = {QStringLiteral("id"), QStringLiteral("type"), QStringLiteral("name"), QStringLiteral("description"), QStringLiteral("group"), QStringLiteral("showInNavigation")};
+        if (!optionalBool(object, QStringLiteral("showInNavigation"), context, &module.showInNavigation, error)) return false;
         if (module.type == QStringLiteral("web")) {
             QSet<QString> keys = common;
-            keys.unite({QStringLiteral("entryUrl"), QStringLiteral("allowedLocalPrefixes"), QStringLiteral("allowedNavigationOrigins"), QStringLiteral("allowedResourceOrigins")});
+            keys.unite({QStringLiteral("entryUrl"), QStringLiteral("allowedLocalPrefixes"), QStringLiteral("allowedNavigationOrigins"), QStringLiteral("allowedResourceOrigins"), QStringLiteral("approvedPages")});
             if (!onlyKeys(object, keys, context, error)
                 || !requiredString(object, QStringLiteral("entryUrl"), context, &module.entryUrl, error)
                 || !stringArray(object, QStringLiteral("allowedLocalPrefixes"), context, &module.allowedLocalPrefixes, error)
@@ -167,6 +201,24 @@ bool ManifestService::parse(const QByteArray &json, ManifestData *manifest, QStr
             } else if (httpsOrigin(module.entryUrl).isEmpty() || !module.allowedLocalPrefixes.isEmpty()
                        || !module.allowedNavigationOrigins.contains(httpsOrigin(module.entryUrl))) {
                 return fail(error, context + QStringLiteral(" 的 HTTPS 入口未被精确授权"));
+            }
+            if (object.contains(QStringLiteral("approvedPages"))) {
+                const QJsonValue pages = object.value(QStringLiteral("approvedPages"));
+                if (!pages.isArray() || pages.toArray().isEmpty())
+                    return fail(error, context + QStringLiteral(" 的 approvedPages 无效"));
+                QSet<QString> pageIds;
+                for (const QJsonValue &value : pages.toArray()) {
+                    if (!value.isObject()) return fail(error, context + QStringLiteral(" 的 approvedPages 项无效"));
+                    ApprovedPageDefinition page;
+                    if (!parseApprovedPage(value.toObject(), context + QStringLiteral(" 的 approvedPages"), &page, error)) return false;
+                    if (pageIds.contains(page.id)) return fail(error, context + QStringLiteral(" 的 approvedPages ID 重复：") + page.id);
+                    pageIds.insert(page.id);
+                    for (const QString &origin : page.allowedNavigationOrigins)
+                        if (!module.allowedNavigationOrigins.contains(origin)) return fail(error, context + QStringLiteral(" 的 approvedPages 导航来源未在模块范围内授权"));
+                    for (const QString &origin : page.allowedResourceOrigins)
+                        if (!module.allowedResourceOrigins.contains(origin)) return fail(error, context + QStringLiteral(" 的 approvedPages 资源来源未在模块范围内授权"));
+                    module.approvedPages.append(page);
+                }
             }
         } else if (module.type == QStringLiteral("native")) {
             QSet<QString> keys = common;

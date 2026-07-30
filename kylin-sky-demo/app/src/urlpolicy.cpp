@@ -22,6 +22,14 @@ UrlPolicy::UrlPolicy(const ManifestData &manifest)
         for (const QString &origin : module.allowedNavigationOrigins) rules.navigationOrigins.append(httpsOrigin(QUrl(origin, QUrl::StrictMode)));
         for (const QString &origin : module.allowedResourceOrigins) rules.resourceOrigins.append(httpsOrigin(QUrl(origin, QUrl::StrictMode)));
         m_rules.insert(module.id, rules);
+        for (const ApprovedPageDefinition &page : module.approvedPages) {
+            Rules pageRules;
+            for (const QString &origin : page.allowedNavigationOrigins)
+                pageRules.navigationOrigins.append(httpsOrigin(QUrl(origin, QUrl::StrictMode)));
+            for (const QString &origin : page.allowedResourceOrigins)
+                pageRules.resourceOrigins.append(httpsOrigin(QUrl(origin, QUrl::StrictMode)));
+            m_rules.insert(module.id + QLatin1Char('#') + page.id, pageRules);
+        }
     }
 }
 bool UrlPolicy::navigationAllowed(const QString &moduleId, const QUrl &url) const

@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=麒麟工作台
-Comment=麒麟桌面业务工作台演示 v0.1.0
+Comment=麒麟桌面业务工作台演示 v@KYLIN_SKY_APPLICATION_VERSION@
 Exec=/opt/kylin-sky-demo/bin/kylin-sky-demo
 Icon=kylin-sky-demo
 Terminal=false

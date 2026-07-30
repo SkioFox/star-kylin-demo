@@ -13,7 +13,12 @@ private slots:
                                    QStringLiteral(":/web-demo/index.html"),
                                    QStringLiteral(":/icons/landmark.svg"),
                                    QStringLiteral(":/qml/MarketWorkspace.qml"),
+                                   QStringLiteral(":/qml/MarketOverviewWorkspace.qml"),
+                                   QStringLiteral(":/qml/GlobalWorkspace.qml"),
+                                   QStringLiteral(":/qml/FuturesWorkspace.qml"),
+                                   QStringLiteral(":/qml/GoldWorkspace.qml"),
                                    QStringLiteral(":/qml/ResearchWorkspace.qml"),
+                                   QStringLiteral(":/qml/NativeMarketWorkspace.qml"),
                                    QStringLiteral(":/qml/WebModulePage.qml"),
                                    QStringLiteral(":/qml/ServicePage.qml"),
                                    QStringLiteral(":/qml/ConfigErrorPage.qml")};

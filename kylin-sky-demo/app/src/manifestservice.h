@@ -12,16 +12,26 @@ struct UserDefinition {
     QString role;
 };
 
+struct ApprovedPageDefinition {
+    QString id;
+    QString name;
+    QString entryUrl;
+    QStringList allowedNavigationOrigins;
+    QStringList allowedResourceOrigins;
+};
+
 struct ModuleDefinition {
     QString id;
     QString type;
     QString name;
     QString description;
     QString group;
+    bool showInNavigation = true;
     QString entryUrl;
     QStringList allowedLocalPrefixes;
     QStringList allowedNavigationOrigins;
     QStringList allowedResourceOrigins;
+    QList<ApprovedPageDefinition> approvedPages;
     QString program;
     QStringList args;
 };
