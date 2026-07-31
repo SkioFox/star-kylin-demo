@@ -69,7 +69,7 @@ bool safeQrc(const QString &value)
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     const QStringList segments = url.path().split(QLatin1Char('/'), QString::SkipEmptyParts);
 #else
-    const QStringList segments = url.path().split('/', Qt::SkipEmptyParts);
+    const QStringList segments = url.path().split(QLatin1Char('/'), Qt::SkipEmptyParts);
 #endif
     return !segments.contains(QStringLiteral(".")) && !segments.contains(QStringLiteral(".."));
 }
